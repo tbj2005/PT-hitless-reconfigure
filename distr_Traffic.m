@@ -31,7 +31,7 @@ for r = 1:size(request,1) % 遍历流
         end 
     end 
     %%找到所有 source pod 的一跳路径和两跳路径，分别存储在 hop1_path 和 hop2_path 中
-    %%判断流使用那些可用路径 %%这是有一跳路径就不找第二跳了
+    %%判断流使用那些可用路径 %%这是有一跳路径就不找第二跳
     flag = 0;
     if ~isempty(hop1_path)
         if  path_topo(source,destination) >= flow_capacity % 如果直连总带宽大于等于流容量，即可直连
