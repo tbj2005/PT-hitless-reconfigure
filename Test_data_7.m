@@ -11,11 +11,11 @@ inputs.physical_conn_oxc = 4; % 一个pod连接到物理
 inputs.maxhop = 2;
 inputs.resi_cap = 0.65;
 
-inputs.request = [2 3 2; 2 4 3];%%每行表示一条需求流量，三元组，源pod，目的pod和带宽需求
-% inputs.request = [2 3 3; 1 4 3;2 4 1];%% 网络比较满，没有可用流量
+% inputs.request = [2 3 2; 2 4 3];%%每行表示一条需求流量，三元组，源pod，目的pod和带宽需求
+inputs.request = [2 3 3; 1 4 3;2 4 1];%% 网络比较满，没有可用流量
 
 
-for m = 1:3
+for m = 1:1
     clearvars -except inputs m stage
     inputs.method = m;
 
@@ -28,7 +28,7 @@ for m = 1:3
     Logical_topo_desi = [0,0,3,0,1;0,0,3,5,0;3,3,0,2,0;0,5,2,0,1;1,0,0,1,0];
     %%%%%%%%%%%输入转化
     [traffic_distr,flowpath,~] = distr_Traffic(Logical_topo_init_cap,inputs);
-    
+    traffic_distr, flowpath
     [S,R,logical_topo_traffic,S_Conn_cap,port_allocation_inti_topo,port_allocation] = convert_inputs(inputs,flowpath,logical_topo);
     %%%%%%%%%%%
     %S,R,logical_topo_traffic{1},logical_topo_traffic{2},S_Conn_cap,port_allocation_inti_topo{1}{1},port_allocation_inti_topo{2}{1},port_allocation{1}{1},port_allocation{2}{1}

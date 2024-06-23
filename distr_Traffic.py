@@ -45,6 +45,7 @@ def distr_Traffic(init_topo_cap, inputs):
 
         # 为流量分配路径
         flag = 0
+        print(1, hop1_path)
         if hop1_path:  # 一跳链路不为空，则尽量直连
             if path_topo[source - 1, destination - 1] >= flow_capacity:  # 直连可以满足带宽要求
                 flow_rest_cap = 0
