@@ -1,6 +1,7 @@
 方法一：
-%先使用input产生初始拓扑A，然后基于A使用generate_network_topology以及disp_flows产生基于拓扑A的流量
-%再基于流量M产生符合物理条件的拓扑B，使用generate_network_topology和gen_topo
+先使用input产生初始拓扑A，然后基于A使用generate_network_topology以及disp_flows产生基于拓扑A的流量
+再基于流量M产生符合物理条件的拓扑B，使用generate_network_topology和gen_topo
+
 方法二：
 使用MILP直接产生
 
