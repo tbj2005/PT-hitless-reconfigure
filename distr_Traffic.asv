@@ -29,7 +29,9 @@ for r = 1:size(request,1) % 遍历流
                 kk = kk - 1;
             end 
         end 
-    end
+    end 
+    hop1_path
+    hop2_path{1}, hop2_path
     %%找到所有 source pod 的一跳路径和两跳路径，分别存储在 hop1_path 和 hop2_path 中
     %%判断流使用那些可用路径 %%这是有一跳路径就不找第二跳
     flag = 0;
@@ -57,7 +59,7 @@ for r = 1:size(request,1) % 遍历流
     
     if flag == 1 
         used_path = hop2_path;
-        for i = 1:size(hop2_path,2) % 遍历所有两跳路径
+        for i = 1:size(hop2_path,1) % 遍历所有两跳路径
              % min_path_cap = min(hop2_path{i}(:,3));%3.12
              pathcap_index = sub2ind([inputs.nodes_num,inputs.nodes_num],hop2_path{i}(:,1),hop2_path{i}(:,2));
              min_path_cap = min(path_topo(pathcap_index));%找到两跳路径的最小带宽
@@ -69,7 +71,6 @@ for r = 1:size(request,1) % 遍历流
                  path_topo(hop2_path{i}(2,1),hop2_path{i}(2,2)) = path_topo(hop2_path{i}(2,1),hop2_path{i}(2,2)) - flow_rest_cap;
                  path_topo(hop2_path{i}(2,2),hop2_path{i}(2,1)) = path_topo(hop2_path{i}(2,1),hop2_path{i}(2,2));
                  flow_rest_cap = 0;
-                 break
              else
                  used_path{i}(:,3) = min_path_cap;
                  flow_rest_cap = flow_rest_cap - min_path_cap;
@@ -82,7 +83,7 @@ for r = 1:size(request,1) % 遍历流
              end
         end
     end
-    flowpath{r}
+    
     if flow_rest_cap > 0  %%如果流r找不到两跳内满足容量需求的，则做一个标记后换一组流，或者拓扑也重新换
         breakflag = 1;
         unava_flow = [unava_flow;[request(r,1:2),flow_rest_cap]];

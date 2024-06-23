@@ -104,7 +104,7 @@ Logical_topo_init = zeros(inputs.nodes_num,inputs.nodes_num);
 
 %% Test data 1
 % Test_data_1;
-Test_data_2;
+% Test_data_2;
 
 %% delta topology
 delta_topology = Logical_topo_desi - Logical_topo_init_conn;%% + indicates add, - indicates delete

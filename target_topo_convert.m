@@ -21,7 +21,6 @@ function E1 = target_topo_convert(S_Conn_cap,S,logical_topo,update_logical_topo,
             add_logical_topo{t,k} = update_logical_topo{t,k} - logical_topo{t,k};
             add_logical_topo{t,k}(add_logical_topo{t,k}<0) = 0;
             [conn_row,conn_col] = find(triu(del_logical_topo{t,k}));
-            del_logical_topo{t,k},conn_row,conn_col
             for conn_ind = 1:length(conn_row)
                 zero_rows = all(S_Conn_cap_1(:,5:6) == 0, 2);
                 S_Conn_cap_1(zero_rows,:) = [];
