@@ -7,10 +7,11 @@
 # 用于仿真 5pod 场景下物理拓扑的计算和平滑重构的调度
 
 import numpy as np
-import Input
+import Input_class
 import distr_Traffic
 
-inputs = Input.NetworkInformation()
+
+inputs = Input_class.NetworkInformation()
 inputs.nodes_num = 5
 inputs.group_num = 2
 inputs.oxc_ports = 20
