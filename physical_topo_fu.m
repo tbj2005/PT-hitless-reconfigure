@@ -101,11 +101,6 @@ while any(update_delta_topo_add,"all")
     % deleted_links_all{t,k} = deleted_links_all{t,k} +
     % update_delta_topo_deled_tk{t,k}; %
     % 上边的值应该是logical_topo_weight的应该取的值的索引 %3.31--line 99->line 222
-    if method == 3
-        Logical_topo.logical_topo_whole_conn = whole_logical_topo;
-        Logical_topo.logical_topo_whole_cap = whole_logical_topo_cap;%应该是网络剩余空闲流量
-    end
-  
     for t = 1:inputs.groupnum
         for k = 1:inputs.oxcnum_agroup
             %%% delete links benifits, should not delete links that added; judge delete links can creat free ports for adding or not
@@ -136,7 +131,6 @@ while any(update_delta_topo_add,"all")
             end
             [row_del1,col_del1] = find(intermid_delta_topo_2);
 
-
             if all(intermid_delta_topo_2(:) == 0) %t,k上的logical_topo不具备删除该topo_del的能力
                 total_benefit(t,k) = -Inf;
                 update_topo{t,k} = [];
@@ -147,18 +141,13 @@ while any(update_delta_topo_add,"all")
     
                 % delta_topo_delete_weight(ind_del) = Logical_topo_weight{t,k}{ind_del}(deleted_links_all_2(ind_del));
                 for we_in = 1:length(row_del1)
-                    % disp('t,k,we_in');
-                    % disp([t,k,we_in]);
+                  
                     deleted_links_all_2 = deleted_links_all_1{t,k};
                     delta_topo_delete_weight(row_del1(we_in),col_del1(we_in)) = Logical_topo_weight{t,k}{row_del1(we_in),col_del1(we_in)}(deleted_links_all_2(row_del1(we_in),col_del1(we_in)));
                 end
                 delta_topo.delta_topo_delete_weight = delta_topo_delete_weight; %
                 delta_topo.delta_topo_delete = intermid_delta_topo_2;
                 delta_topo.delta_topo_add = update_delta_topo_add;
-                if method == 3
-                    Logical_topo.logical_topo_whole_conn = whole_logical_topo;
-                    Logical_topo.logical_topo_whole_cap = whole_logical_topo_cap;%应该是网络剩余空闲流量
-                end
                 Logical_topo.logical_topo_cap = update_logical_topo_cap{t,k};
                 Logical_topo.logical_topo = update_logical_topo{t,k};
                 
@@ -173,19 +162,6 @@ while any(update_delta_topo_add,"all")
                 %     %%% 删除delta中需要删除的链接是最优的选择，但是可能存在不可行解，需要新增删除的链接
                 %     %%% 加一个判断，当待删除的链接删除之后无法为新增链接创造端口，则需要删除额外的链接，也需要增加额外的链接
                 % end
-                %%%%debug
-                for tt = 1:inputs.groupnum
-                    for kk = 1:inputs.oxcnum_agroup
-                        update_logical_topo_check = update_topo{t,k}.update_logical_topo;
-                        if ~isequal(update_logical_topo_check,update_logical_topo_check') 
-                            disp('not equal')
-                        end
-                         % update_logical_topo_check(update_logical_topo_check > 0) = 0;
-                         % sum_check1 = sum(update_logical_topo_check,'all');
-                         % check = 1;
-                    end
-                end
-                %%%%debug
             end
         end
     end
@@ -202,33 +178,14 @@ while any(update_delta_topo_add,"all")
         %% 如果每个平面不能新增链接，但是还需要新增链接
         while ~all(update_delta_topo_add(:) == 0)
             b_check = b_check + 1;
-            disp(b_check);
-             
+
             %%%%NOTE：相当于整个循环出不来
             % [update_delta_topo_add,update_logical_topo,update_delta_topo_dele] = add_conns(inputs,logical_topo,Logical_topo_weight,update_delta_topo_add, update_logical_topo,update_delta_topo_dele);
             [update_delta_topo_add,update_logical_topo,update_delta_topo_dele] = re_add_conns(inputs,logical_topo,Logical_topo_weight,update_delta_topo_add, update_logical_topo, update_delta_topo_dele);
-             %%% debug
-            for tt = 1:inputs.groupnum
-                for kk = 1:inputs.oxcnum_agroup
-                    update_logical_topo_check = update_logical_topo{tt,kk};
-                    if ~isequal(update_logical_topo_check,update_logical_topo_check') 
-                        disp('not equal')
-                    end
-
-                     % update_logical_topo_check(update_logical_topo_check > 0) = 0;
-                     % sum_check1 = sum(update_logical_topo_check,'all');
-                     % check = 1;
-                end
-            end
-            % if b_check > 20
-            %     update_check_flag = 1;
-            %     return
-            % end
         end
     else
         min_total_benfit  = max(total_benefit,[],"all");
-        [min_row,min_col] = find(total_benefit==min_total_benfit);
-        %%TODO：问题：addtopo没有更新(?)
+        [min_row,min_col] = find(total_benefit==min_total_benfit);     
         update_logical_topo{min_row(1),min_col(1)} = update_topo{min_row(1),min_col(1)}.update_logical_topo;
         update_logical_topo_cap{min_row(1),min_col(1)} = update_topo{min_row(1),min_col(1)}.update_delta_add_topo;
         update_delta_topo_dele_ed = update_topo{min_row(1),min_col(1)}.update_delta_dele_topo_ed;%%在选中的k,t上删除的链接拓扑
@@ -236,11 +193,7 @@ while any(update_delta_topo_add,"all")
         update_delta_topo_dele = update_delta_topo_dele - update_delta_topo_dele_ed;
         update_delta_topo_deled_tk{min_row(1),min_col(1)} = update_delta_topo_dele_ed; %3.26
         deleted_links_all{min_row(1),min_col(1)} = deleted_links_all{min_row(1),min_col(1)} + update_delta_topo_deled_tk{min_row(1),min_col(1)}; %3.31
-      
-        if method == 3
-           whole_logical_topo = update_topo{min_row(1),min_col(1)}.logical_topo_whole_conn;
-           whole_logical_topo_cap = update_topo{min_row(1),min_col(1)}.logical_topo_whole_cap;
-        end
+        
     end
 end   
 end

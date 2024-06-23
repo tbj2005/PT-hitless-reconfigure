@@ -2,12 +2,6 @@
 %%% 2 对于每个待增加的链接  删除每个平面和该节点有关的所有连接 再进行判断
 %%% 该函数实现第一种方法
 function [links_tobe_add_topo,update_logical_topo,update_delta_topo_del] = re_add_conns(inputs,logical_topo,Logical_topo_weight,update_delta_topo_add, update_logical_topo, update_delta_topo_del)
-
-% while
-
-
-% check_tk_topo = ones(inputs.groupnum,inputs.oxcnum_agroup);%初始化标记矩阵
-%当所有的t,k 被检查完或者sub_addlinks_change是空的，即应该增加的链接被增加完
 index = 1;
 while index <= inputs.groupnum * inputs.oxcnum_agroup
     
@@ -62,19 +56,6 @@ while index <= inputs.groupnum * inputs.oxcnum_agroup
         % [links_tobe_add_topo,update_logical_topo,update_delta_topo_del,used_ind] = sub_add_conns(inputs,update_logical_topo_weight, update_logical_topo, update_delta_topo_del,links_tobe_add_topo,used_ind);
         [links_tobe_add_topo,update_logical_topo,update_delta_topo_del,used_ind] = sub_add_conns_v2(inputs,update_logical_topo_weight, update_logical_topo, update_delta_topo_del,links_tobe_add_topo,used_ind,del_update_logical_topo);
         
-        %%debug
-        row_sums = sum(update_logical_topo{used_ind}, 2);
-        [find_rows,~] = find(row_sums > inputs.physical_conn_oxc); %超出
-        if ~isempty(find_rows)
-            disp('out')
-            disp(find_rows)
-        end
-        % if ~isequal(update_logical_topo{used_ind},update_logical_topo{used_ind}') 
-        %     disp('not equal1')
-        %     disp(used_ind)
-        % end
-        %%debug
-
         index = index +1;
 
         if isempty(links_tobe_add_topo)
@@ -84,30 +65,16 @@ while index <= inputs.groupnum * inputs.oxcnum_agroup
         % [links_tobe_add_topo,update_logical_topo,update_delta_topo_del,used_ind] = sub_add_conns(inputs,update_logical_topo_weight, update_logical_topo, update_delta_topo_del,links_tobe_add_topo,used_ind);
         [links_tobe_add_topo,update_logical_topo,update_delta_topo_del,used_ind] = sub_add_conns_v2(inputs,update_logical_topo_weight, update_logical_topo, update_delta_topo_del,links_tobe_add_topo,used_ind,del_update_logical_topo);
 
-        if ~isequal(update_logical_topo{used_ind(end)},update_logical_topo{used_ind(end)}') 
-            disp('not equal2')
-            disp(used_ind)
-        end
+        % if ~isequal(update_logical_topo{used_ind(end)},update_logical_topo{used_ind(end)}') 
+        %     disp('not equal2')
+        %     disp(used_ind)
+        % end
 
         index = index +1;  
         if isempty(links_tobe_add_topo)
             break
         end
     end
-
-    % disp('in this loop')
 end
 
-
-
-
-
-
-
-
-
-
-
-
-  
 

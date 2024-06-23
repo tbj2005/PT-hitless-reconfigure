@@ -14,20 +14,19 @@ remain = rem(sum_port, Omega);%取余
 %pod和oxc之间的物理连接数目G_u^k,t
 G = ones(Omega, K, T);%初始化三维数组，赋值
 G = G.*ave;
-
 if remain ~= 0%有余数时执行
     for i = 1 : size(G, 3)%有几个平面
         for j = 1 : size(G, 2)%每个平面有几个oxc
-            Rand = randi([1, Omega], 1, remain); % 随机选pod，放进1×remain矩阵
+            Rand = randi([1, Omega], 1, remain);
             for k = 1 : remain
-                G(Rand(1,k),j,i) = G(Rand(1,k),j,i) + 1; % 随机加连接
+                G(Rand(1,k),j,i) = G(Rand(1,k),j,i) + 1;
             end
         end
     end
 end
 
 %将连接具体分配到端口上
-port_allocation = cell(size(G, 3),1);%初始化一个空cell数组，每个元素表示一个子拓扑
+port_allocation = cell(size(G, 3),1);%初始化一个空cell数组
 for i = 1 : size(G, 3)%有几个平面
     for j = 1 : size(G, 2)%每个平面有几个oxc
         p = 0;%指示oxc的端口序号

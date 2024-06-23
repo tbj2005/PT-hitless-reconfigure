@@ -38,4 +38,5 @@ function del_links_real = del_conns(inputs,add_links_tk_topo,update_logical_topo
         [del_real_row,~] = find(del_links_topo1 == 0);
         del_real_row = unique(del_real_row);
         del_links_real = del_links_topo(del_real_row,:);
-     end
+    end
+    
