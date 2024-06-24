@@ -14,6 +14,7 @@ remain = rem(sum_port, Omega);%取余
 %pod和oxc之间的物理连接数目G_u^k,t
 G = ones(Omega, K, T);%初始化三维数组，赋值
 G = G.*ave;
+
 if remain ~= 0%有余数时执行
     for i = 1 : size(G, 3)%有几个平面
         for j = 1 : size(G, 2)%每个平面有几个oxc
@@ -39,7 +40,7 @@ for i = 1 : size(G, 3)%有几个平面
         end
     end
 end
-
+port_allocation{1, 1}, port_allocation{2, 1}
 %%初始物理拓扑由logical_topo{t,k}计算,然后把pod之间连接数的数值转化为端口之间的对应关系
 S = zeros(sum_port,sum_port,K,T);
 port_allocation_inti_topo = port_allocation;

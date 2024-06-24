@@ -11,7 +11,7 @@ import copy
 
 def distr_Traffic(init_topo_cap, inputs):
     """
-
+    用于通过当前逻辑拓扑调度当前需求流量
     :param init_topo_cap: 初始逻辑拓扑带宽容量
     :param inputs: OXC和流量需求信息
     :return:
@@ -45,7 +45,6 @@ def distr_Traffic(init_topo_cap, inputs):
 
         # 为流量分配路径
         flag = 0
-        print(1, hop1_path)
         if hop1_path:  # 一跳链路不为空，则尽量直连
             if path_topo[source - 1, destination - 1] >= flow_capacity:  # 直连可以满足带宽要求
                 flow_rest_cap = 0
@@ -56,8 +55,8 @@ def distr_Traffic(init_topo_cap, inputs):
             else:  # 直连带宽不足，但是还是要用完所有直连带宽
                 flow_path[r] = [[hop1_path[0], hop1_path[1], hop1_path[2]]]
                 link_rest_cap = 0
-                path_topo[hop1_path[0], hop1_path[1]] = link_rest_cap
-                path_topo[hop1_path[1], hop1_path[0]] = link_rest_cap
+                path_topo[hop1_path[0] - 1, hop1_path[1] - 1] = link_rest_cap
+                path_topo[hop1_path[1] - 1, hop1_path[0] - 1] = link_rest_cap
                 flow_rest_cap = flow_capacity - hop1_path[2]
                 flag = 1
         else:  # 一开始就没有直连链路
@@ -75,6 +74,7 @@ def distr_Traffic(init_topo_cap, inputs):
                     used_path[i][0][2] = flow_rest_cap
                     used_path[i][1][2] = flow_rest_cap
                     flow_path[r] += used_path[i]
+
                     path_topo[hop2_path[i][0][0] - 1, hop2_path[i][0][1] - 1] -= flow_rest_cap
                     path_topo[hop2_path[i][0][1] - 1, hop2_path[i][0][0] - 1] -= flow_rest_cap
                     path_topo[hop2_path[i][1][0] - 1, hop2_path[i][1][1] - 1] -= flow_rest_cap
@@ -96,6 +96,7 @@ def distr_Traffic(init_topo_cap, inputs):
                                 path_topo[hop2_path[i][1][1] - 1, hop2_path[i][1][0] - 1] - min_path_cap))
                     # 更新剩余带宽资源
                     flow_path[r] += used_path[i]
+
         # 若流量不满足要求，标记之
         if flow_rest_cap > 0:
             break_flag = 1
@@ -105,9 +106,10 @@ def distr_Traffic(init_topo_cap, inputs):
             # 元素为一个元胞数组，数组中的每个元素都为一个三元组[S,D,R]，表示这条流的源和目的 pod 与带宽分配
             # 因为网络中存在两跳转发，位于两个 pod 间的流，其源 pod 和目的 pod 可能把并不是这两个 pod
             for j in range(0, len(flow_path[r])):
-                if traffic_distr[flow_path[r][j][0], flow_path[r][j][1]]:
-                    traffic_distr[flow_path[r][j][0] - 1, flow_path[r][j][1] - 1] += [source, destination, flow_path[r][j][2]]
+                if traffic_distr[flow_path[r][j][0] - 1, flow_path[r][j][1] - 1]:
+                    traffic_distr[flow_path[r][j][0] - 1, flow_path[r][j][1] - 1] = traffic_distr[flow_path[r][j][0] - 1, flow_path[r][j][1] - 1], [source, destination, flow_path[r][j][2]]
+                    traffic_distr[flow_path[r][j][0] - 1, flow_path[r][j][1] - 1] = list(traffic_distr[flow_path[r][j][0] - 1, flow_path[r][j][1] - 1])
                 else:
-                    traffic_distr[flow_path[r][j][0] - 1, flow_path[r][j][1] - 1] = [source, destination, flow_path[r][j][2]]
+                    traffic_distr[flow_path[r][j][0] - 1, flow_path[r][j][1] - 1] = ([source, destination, flow_path[r][j][2]])
 
     return traffic_distr, flow_path, break_flag, unavail_flow

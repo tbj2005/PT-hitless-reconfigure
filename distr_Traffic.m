@@ -30,7 +30,6 @@ for r = 1:size(request,1) % 遍历流
             end 
         end 
     end
-    hop1_path
     %%找到所有 source pod 的一跳路径和两跳路径，分别存储在 hop1_path 和 hop2_path 中
     %%判断流使用那些可用路径 %%这是有一跳路径就不找第二跳
     flag = 0;
@@ -83,7 +82,6 @@ for r = 1:size(request,1) % 遍历流
              end
         end
     end
-    flowpath{r}
     if flow_rest_cap > 0  %%如果流r找不到两跳内满足容量需求的，则做一个标记后换一组流，或者拓扑也重新换
         breakflag = 1;
         unava_flow = [unava_flow;[request(r,1:2),flow_rest_cap]];
