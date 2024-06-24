@@ -10,7 +10,7 @@ import numpy as np
 import Input_class
 import distr_Traffic
 import convert_inputs
-
+import physical_topo_fu
 
 inputs = Input_class.NetworkInformation()
 inputs.nodes_num = 5
@@ -43,8 +43,9 @@ for m in range(0, 1):
 
     traffic_distr, flow_path, _, _ = distr_Traffic.distr_Traffic(Logical_topo_init_cap, inputs)
 
-    S, R, logical_topo_traffic, S_Conn_cap, port_allocation_inti_topo, port_allocation = convert_inputs.convert_inputs(inputs, flow_path, logical_topo)
+    S, R, logical_topo_traffic, S_Conn_cap, port_allocation_inti_topo, port_allocation = convert_inputs.convert_inputs(
+        inputs, flow_path, logical_topo)
 
     delta_topology = Logical_topo_desi - Logical_topo_init_conn
 
-
+    physical_topo_fu.physical_topo_fu(inputs, delta_topology, traffic_distr, logical_topo_traffic, logical_topo, logical_topo_cap)
