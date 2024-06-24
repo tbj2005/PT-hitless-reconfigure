@@ -30,6 +30,7 @@ for m = 1:1
     [traffic_distr,flowpath,~] = distr_Traffic(Logical_topo_init_cap,inputs);
 
     [S,R,logical_topo_traffic,S_Conn_cap,port_allocation_inti_topo,port_allocation] = convert_inputs(inputs,flowpath,logical_topo);
+
     %%%%%%%%%%%
     %S,R,logical_topo_traffic{1},logical_topo_traffic{2},S_Conn_cap,port_allocation_inti_topo{1}{1},port_allocation_inti_topo{2}{1},port_allocation{1}{1},port_allocation{2}{1}
     %%拓扑变换

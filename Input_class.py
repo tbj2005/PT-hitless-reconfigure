@@ -23,16 +23,9 @@ class NetworkInformation:
         self.request = []  # 通信需求三元组[S, D, R]
 
 
-inputs = NetworkInformation()
-inputs.nodes_num = 4
-inputs.group_num = 2
-inputs.oxc_ports = 12
-inputs.oxc_num_a_group = 1
-inputs.connection_cap = 1
-inputs.physical_conn_oxc = 3
-inputs.max_hop = 2
-inputs.resi_cap = 0.65
-inputs.method = 3
-
-max_links_in_nodes = inputs.physical_conn_oxc
-Logical_topo_init = np.zeros([inputs.nodes_num, inputs.nodes_num])
+class Request:
+    def __int__(self):
+        self.source = 0  # 需求流量的源 pod
+        self.destination = 0  # 需求流量的目的 pod
+        self.demands = 0  # 需求流量的带宽需求
+        self.route = []  # 需求流量的路由方案

@@ -40,7 +40,7 @@ for i = 1 : size(G, 3)%有几个平面
         end
     end
 end
-port_allocation{1, 1}, port_allocation{2, 1}
+
 %%初始物理拓扑由logical_topo{t,k}计算,然后把pod之间连接数的数值转化为端口之间的对应关系
 S = zeros(sum_port,sum_port,K,T);
 port_allocation_inti_topo = port_allocation;
@@ -120,7 +120,7 @@ for r = 1:req_num
                 ava_port = S_Conn_cap(ava_rows,1:7);%对应的端口和OXC平面  %后边整体更新S_conn_cap
                 [Xsorted,sortedind] = sort(ava_port(:,7));%对端口的剩余容量排序
                 ava_ports{ii} = ava_port(sortedind,1:7);
-            end        
+            end
             if size(path_hop{jj},1) > 1 %路径有两跳，需要分配，从端口数多的,即平均流量少的开始计算
                 flag = 0;
                 for ij = 1:ava_ports_num(1) 

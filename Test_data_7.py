@@ -43,4 +43,8 @@ for m in range(0, 1):
 
     traffic_distr, flow_path, _, _ = distr_Traffic.distr_Traffic(Logical_topo_init_cap, inputs)
 
-    convert_inputs.convert_inputs(inputs, flow_path, logical_topo)
+    S, R, logical_topo_traffic, S_Conn_cap, port_allocation_inti_topo, port_allocation = convert_inputs.convert_inputs(inputs, flow_path, logical_topo)
+
+    delta_topology = Logical_topo_desi - Logical_topo_init_conn
+
+
