@@ -29,3 +29,16 @@ class Request:
         self.destination = 0  # 需求流量的目的 pod
         self.demands = 0  # 需求流量的带宽需求
         self.route = []  # 需求流量的路由方案
+
+
+class DeltaTopology:
+    def __init__(self):
+        self.delta_topo_delete_weight = 0
+        self.delta_topo_delete = 0
+        self.delta_topo_add = 0
+
+
+class LP:
+    def __init__(self):
+        self.logical_topo_cap = 0
+        self.logical_topo = 0

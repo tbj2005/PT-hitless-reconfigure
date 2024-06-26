@@ -102,6 +102,7 @@ def convert_inputs(inputs, flow_path, logical_topo):
         R[r].source = request[r][0]
         R[r].destination = request[r][1]
         R[r].demands = request[r][2]
+        R[r].route = []
         for n in range(0, len(flow_path[r])):
             row_des = [k for k in range(0, len(flow_path[r])) if flow_path[r][k][1] == R[r].destination]
             # row_des 表征哪些行代表着一条流的最后一跳，因为网络中有一跳和两跳两种路由方案
@@ -127,7 +128,6 @@ def convert_inputs(inputs, flow_path, logical_topo):
                     sorted_ind = [i[0] for i in sorted(enumerate(A), key=lambda x: x[1])]  # 对这些连接的端口容量排序
                     ava_ports.append([ava_port[k][0:7] for k in sorted_ind])  # 放置这个路由方案可使用连接的信息
 
-                R[r].route = []
                 if len(path_hop[jj]) > 1:  # 路径为两跳
                     flag = 0
                     for ij in range(0, ava_ports_num[0]):
@@ -137,7 +137,7 @@ def convert_inputs(inputs, flow_path, logical_topo):
                             for ji in range(0, ava_ports_num[1]):
                                 if ava_ports[1][ji][6] > 0:
                                     flow_val = min(ava_ports[0][ij][6], ava_ports[1][ji][6], flow_cap_r[jj])
-                                    R[r].route.extend([ava_ports[0][ij][2:6], ava_ports[1][ji][2:6], flow_val])
+                                    R[r].route.extend([ava_ports[0][ij][2:6] + ava_ports[1][ji][2:6] + [flow_val]])
 
                                     t = ava_ports[0][ij][2]
                                     k = ava_ports[0][ij][3]
@@ -187,7 +187,7 @@ def convert_inputs(inputs, flow_path, logical_topo):
                     for ij in range(0, ava_ports_num[0]):
                         if ava_ports[0][ij][6] > 0:
                             flow_value = min(ava_ports[0][ij][6], flow_cap_r[jj])
-                            R[r].route.extend([ava_ports[0][ij][2:6], flow_value])
+                            R[r].route.extend([ava_ports[0][ij][2:6] + [flow_value]])
 
                             t = ava_ports[0][ij][2]
                             k = ava_ports[0][ij][3]

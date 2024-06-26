@@ -95,7 +95,6 @@ end
 update_delta_topo_dele_ed = zeros(inputs.nodes_num,inputs.nodes_num);
 update_delta_topo_dele = delta_topo_dele;
 % deleted_links_all = ones(inputs.nodes_num,inputs.nodes_num);
-
 while any(update_delta_topo_add,"all")
 
     % deleted_links_all{t,k} = deleted_links_all{t,k} +
@@ -130,7 +129,7 @@ while any(update_delta_topo_add,"all")
                 end
             end
             [row_del1,col_del1] = find(intermid_delta_topo_2);
-
+            all(intermid_delta_topo_2(:) == 0)
             if all(intermid_delta_topo_2(:) == 0) %t,k上的logical_topo不具备删除该topo_del的能力
                 total_benefit(t,k) = -Inf;
                 update_topo{t,k} = [];
@@ -141,7 +140,7 @@ while any(update_delta_topo_add,"all")
     
                 % delta_topo_delete_weight(ind_del) = Logical_topo_weight{t,k}{ind_del}(deleted_links_all_2(ind_del));
                 for we_in = 1:length(row_del1)
-                  
+                    we_in, row_del1(we_in), col_del1(we_in)
                     deleted_links_all_2 = deleted_links_all_1{t,k};
                     delta_topo_delete_weight(row_del1(we_in),col_del1(we_in)) = Logical_topo_weight{t,k}{row_del1(we_in),col_del1(we_in)}(deleted_links_all_2(row_del1(we_in),col_del1(we_in)));
                 end
