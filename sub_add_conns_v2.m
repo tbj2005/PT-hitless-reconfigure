@@ -34,7 +34,7 @@ for t = 1:inputs.groupnum
             match_cols = setdiff(match_cols,alreay_matched_nodes);
             matchnode{node_ind} = [match_cols;links_tobe_add_topo(node_ind,match_cols)]'; %%每个节点能匹配的节点以及该节点对需要的数量            
         end
-
+        matchnode, max_match_num
         % 使用最大流算法找出最大能连接的数目以及节点间的对应关系
         [mf(t,k),add_connections{t,k}] = max_flow(inputs,matchnode,max_match_num); % Note：add_connections是单向链接
         

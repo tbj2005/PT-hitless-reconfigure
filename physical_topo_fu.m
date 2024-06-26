@@ -171,7 +171,6 @@ while any(update_delta_topo_add,"all")
     %%% 并不是说预计删除的链接删完而需要增加的链接还没增加完才才需要考虑删除别的链接，而是一旦所有平面都不满足新增链接的条件，但是仍有新增链接未增加，则需要进入
     %%% 最差可以基于此粗暴的断开剩下的链接然后重连
     b_check = 0;
-    new_add_links, total_benefit
     if all(new_add_links(:) == 0)
         %% 如果每个平面不能新增链接，但是还需要新增链接
         while ~all(update_delta_topo_add(:) == 0)
@@ -182,8 +181,8 @@ while any(update_delta_topo_add,"all")
             [update_delta_topo_add,update_logical_topo,update_delta_topo_dele] = re_add_conns(inputs,logical_topo,Logical_topo_weight,update_delta_topo_add, update_logical_topo, update_delta_topo_dele);
         end
     else
-        min_total_benfit  = max(total_benefit,[],"all");
-        [min_row,min_col] = find(total_benefit==min_total_benfit);     
+        min_total_benefit  = max(total_benefit,[],"all");
+        [min_row,min_col] = find(total_benefit==min_total_benefit);     
         update_logical_topo{min_row(1),min_col(1)} = update_topo{min_row(1),min_col(1)}.update_logical_topo;
         update_logical_topo_cap{min_row(1),min_col(1)} = update_topo{min_row(1),min_col(1)}.update_delta_add_topo;
         update_delta_topo_dele_ed = update_topo{min_row(1),min_col(1)}.update_delta_dele_topo_ed;%%在选中的k,t上删除的链接拓扑
