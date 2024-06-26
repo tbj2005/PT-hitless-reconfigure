@@ -38,7 +38,7 @@ for m = 1:1
     
     %%计算物理目标物理拓扑
     [update_logical_topo] = physical_topo_fu(inputs,delta_topology,traffic_distr,logical_topo_traffic,logical_topo,logical_topo_cap);
-    
+    update_logical_topo
     %%%%%%%%%目标物理拓扑接口转化
     E = target_topo_convert(S_Conn_cap,S,logical_topo,update_logical_topo,port_allocation_inti_topo,inputs);
     %%%%%%%%%目标物理拓扑接口转化

@@ -1,4 +1,4 @@
-function [total_cost,update_topo,new_add_links] = cost_delconn_groom(inputs,delta_topo,Logical_topo,method,traffic_distr)
+function [total_cost,update_topo,new_add_links] = cost_delconn_groom(inputs,delta_topo,Logical_topo,method)
     %%要给出删除的链接拓扑，上边的权重，和上边的流量（源-目的，需求带宽）
     %1. 直接选择可以删除链接最多的那个逻辑拓扑  2. 挨个匹配，还是要看删掉可以增加的链接数，以及去掉多余删除的代价，求取物理拓扑
     %2.
@@ -70,14 +70,13 @@ function [total_cost,update_topo,new_add_links] = cost_delconn_groom(inputs,delt
             update_delta_add_topo(subindex(i,2),subindex(i,1)) = update_delta_add_topo(subindex(i,1),subindex(i,2));
         end
         new_add_links = sum(can_add_conns_innodepair,'all');
-       
         for i = 1:size(subindex,1)
             %% need to judge which deleted links do not contribute to add connections
             % 如果删除的链接的两端端口都没有被使用，则需要被回收；如果腾出了两个可用端口，只使用了一个，那么就选择上边流量少的回收
             %1. mark the specific added links, check the free ports unused
             if can_add_conns_innodepair(i) > 0 %%
                 valuesin_addnodepairs = repmat([subindex(i,1),subindex(i,2)], 1, can_add_conns_innodepair(i));
-                for j = 1:2*can_add_conns_innodepair(i)  
+                for j = 1:2*can_add_conns_innodepair(i) 
                     [~,loc_freeports] = ismember(valuesin_addnodepairs(j),free_ports);
                     if loc_freeports ~= 0
                        free_ports(:,loc_freeports) = 0;
@@ -90,7 +89,7 @@ function [total_cost,update_topo,new_add_links] = cost_delconn_groom(inputs,delt
                             % sortindex_delete(row_indices(min_row_index),col_indices(min_row_index)) = 0;%%3/10
                             del_index(row_indices(min_row_index), col_indices(min_row_index)) = 0;
                         end
-                    end                    
+                    end  
                 end
             end %%   
         end    

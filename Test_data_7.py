@@ -28,7 +28,7 @@ inputs.request = [[2, 3, 2], [2, 4, 3]]
 T = inputs.group_num
 K = inputs.oxc_num_a_group
 
-for m in range(0, 1):
+for m in range(1, 2):
     inputs.method = m
 
     logical_topo = np.empty((T, K), dtype=object)

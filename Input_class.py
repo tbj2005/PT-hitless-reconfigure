@@ -42,3 +42,12 @@ class LP:
     def __init__(self):
         self.logical_topo_cap = 0
         self.logical_topo = 0
+
+
+class UP:
+    def __init__(self):
+        self.update_logical_topo_cap = 0
+        self.update_logical_topo = 0
+        self.update_delta_add_topo = 0
+        self.update_delta_delete_topo_ed = 0
+        self.update_delta_topo_delete = 0

@@ -129,7 +129,6 @@ while any(update_delta_topo_add,"all")
                 end
             end
             [row_del1,col_del1] = find(intermid_delta_topo_2);
-            all(intermid_delta_topo_2(:) == 0)
             if all(intermid_delta_topo_2(:) == 0) %t,k上的logical_topo不具备删除该topo_del的能力
                 total_benefit(t,k) = -Inf;
                 update_topo{t,k} = [];
@@ -140,7 +139,6 @@ while any(update_delta_topo_add,"all")
     
                 % delta_topo_delete_weight(ind_del) = Logical_topo_weight{t,k}{ind_del}(deleted_links_all_2(ind_del));
                 for we_in = 1:length(row_del1)
-                    we_in, row_del1(we_in), col_del1(we_in)
                     deleted_links_all_2 = deleted_links_all_1{t,k};
                     delta_topo_delete_weight(row_del1(we_in),col_del1(we_in)) = Logical_topo_weight{t,k}{row_del1(we_in),col_del1(we_in)}(deleted_links_all_2(row_del1(we_in),col_del1(we_in)));
                 end
@@ -152,7 +150,7 @@ while any(update_delta_topo_add,"all")
                 
                 %%% judge delete links can creat the number of free ports for adding 
                 %%计算增删的代价
-                [total_benefit(t,k),update_topo{t,k},new_add_links(t,k)] = cost_delconn_groom(inputs,delta_topo,Logical_topo,method,traffic_distr); 
+                [total_benefit(t,k),update_topo{t,k},new_add_links(t,k)] = cost_delconn_groom(inputs,delta_topo,Logical_topo,method); 
                 % if all(update_topo{t,k}.update_delta_topo_dele==0,'all') && ~all(update_topo{t,k}.update_delta_add_topo==0,'all')
                 %     total_benefit(t,k)= -Inf;%不能是INF，还可以利用其他空闲端口增加连接，然后删除本平面的该连接
                 %     %%% 1. 查看要增加的连接的两个端口在哪些平面上还具有空闲端口
@@ -173,6 +171,7 @@ while any(update_delta_topo_add,"all")
     %%% 并不是说预计删除的链接删完而需要增加的链接还没增加完才才需要考虑删除别的链接，而是一旦所有平面都不满足新增链接的条件，但是仍有新增链接未增加，则需要进入
     %%% 最差可以基于此粗暴的断开剩下的链接然后重连
     b_check = 0;
+    new_add_links, total_benefit
     if all(new_add_links(:) == 0)
         %% 如果每个平面不能新增链接，但是还需要新增链接
         while ~all(update_delta_topo_add(:) == 0)

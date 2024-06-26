@@ -68,6 +68,8 @@ def physical_topo_fu(inputs, delta_topology, traffic_distr, logical_topo_traffic
         np.empty([inputs.group_num, inputs.oxc_num_a_group, inputs.nodes_num, inputs.nodes_num], dtype=object))
     update_delta_topo_delete_tk = np.empty([inputs.group_num, inputs.oxc_num_a_group], dtype=object)
     deleted_links_all = np.empty([inputs.group_num, inputs.oxc_num_a_group], dtype=object)
+    total_benefit = np.empty([inputs.group_num, inputs.oxc_num_a_group], dtype=object)
+    new_add_links = np.empty([inputs.group_num, inputs.oxc_num_a_group], dtype=object)
     for t in range(0, inputs.group_num):
         for k in range(0, inputs.oxc_num_a_group):
             logical_topo_traffic[t][k] += logical_topo_traffic[t][k].T
@@ -107,9 +109,7 @@ def physical_topo_fu(inputs, delta_topology, traffic_distr, logical_topo_traffic
     update_delta_topo_delete = copy.deepcopy(delta_topo_delete)
 
     while np.sum(update_delta_topo_add) > 0:
-        total_benefit = np.zeros([inputs.group_num, inputs.oxc_num_a_group])
         update_topo = np.empty([inputs.group_num, inputs.oxc_num_a_group])
-        new_add_links = np.zeros([inputs.group_num, inputs.oxc_num_a_group])
         deleted_links_all_1 = (
             np.empty([inputs.group_num, inputs.oxc_num_a_group, inputs.nodes_num, inputs.nodes_num], dtype=int))
         for t in range(0, inputs.group_num):
@@ -146,4 +146,10 @@ def physical_topo_fu(inputs, delta_topology, traffic_distr, logical_topo_traffic
                     Logical_topo.logical_topo_cap = copy.deepcopy(update_logical_topo_cap[t][k])
                     Logical_topo.logical_topo = update_logical_topo[t][k]
 
-                    cost_delconn_groom.cost_del_conn_groom(inputs, delta_topo, Logical_topo, method, traffic_distr)
+                    total_benefit[t][k], update_topo, new_add_links[t][k] = cost_delconn_groom.cost_del_conn_groom(inputs, delta_topo, Logical_topo, method)
+
+        print(total_benefit, new_add_links)
+        b_check = 0
+        if np.sum(new_add_links) == 0:
+            while np.sum(update_delta_topo_add) > 0:
+                b_check += 1

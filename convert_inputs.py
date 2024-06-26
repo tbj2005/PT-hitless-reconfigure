@@ -116,7 +116,7 @@ def convert_inputs(inputs, flow_path, logical_topo):
                 ava_ports = []
                 ava_ports_num = []  # 存储可以用于传输该路由方案每一跳的连接数目
                 for ii in range(0, len(path_hop[jj])):  # 循环一次或两次，对应流为一跳或两跳
-                    Lialoc = [1 if S_Conn_cap[k][0:2] == [path_hop[jj][ii][k] - 1 for k in range(0, 2)]
+                    Lialoc = [1 if S_Conn_cap[k][0:2] == [path_hop[jj][ii][n] - 1 for n in range(0, 2)]
                               else 0 for k in range(0, len(S_Conn))]
                     # 匹配 pod 连接情况与这一跳的路由方案
                     ava_ports_num.append(sum(Lialoc))
