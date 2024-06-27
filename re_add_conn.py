@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 """
 作者：TBJ
-日期：2024年06约26日
+日期：2024年06月26日
 """
 import numpy as np
 
