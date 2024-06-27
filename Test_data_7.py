@@ -48,4 +48,6 @@ for m in range(1, 2):
 
     delta_topology = Logical_topo_desi - Logical_topo_init_conn
 
-    physical_topo_fu.physical_topo_fu(inputs, delta_topology, traffic_distr, logical_topo_traffic, logical_topo, logical_topo_cap)
+    physical_topo_fu.physical_topo_fu(inputs, delta_topology, logical_topo_traffic, logical_topo, logical_topo_cap)
+
+    print(1)

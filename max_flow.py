@@ -4,17 +4,10 @@
 日期：2024年06约26日
 """
 import maxflow
-import numpy as np
-import pandas as pd
-import networkx as nx
-import matplotlib.pyplot as plt
 
 
 def max_flow(inputs, match_node, max_match_num):
-    mf = 0
     add_connections = []
-    s = inputs.nodes_num * 2 + 1
-    t = inputs.nodes_num * 2 + 2
     G = maxflow.Graph[float](2 * inputs.nodes_num, 2 * inputs.nodes_num)
     nodes = G.add_nodes(2 * inputs.nodes_num)
     for i in range(0, inputs.nodes_num):

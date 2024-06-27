@@ -13,7 +13,7 @@ import Input_class
 # 该函数用于计算目标物理拓扑
 
 
-def physical_topo_fu(inputs, delta_topology, traffic_distr, logical_topo_traffic, logical_topo, logical_topo_cap):
+def physical_topo_fu(inputs, delta_topology, logical_topo_traffic, logical_topo, logical_topo_cap):
     method = inputs.method
     delta_topo_add = copy.deepcopy(delta_topology)
     delta_topo_delete = copy.deepcopy(delta_topology)
@@ -51,26 +51,26 @@ def physical_topo_fu(inputs, delta_topology, traffic_distr, logical_topo_traffic
                 can_add_conns_InNodePair = min(require_add_conns_InNodePair, max_add_conns_InNodePair)
                 update_logical_topo[t][k][sub_index[i][0]][sub_index[i][1]] = \
                     can_add_conns_InNodePair + update_logical_topo[t][k][sub_index[i][0]][sub_index[i][1]]
-                update_logical_topo[t][k][sub_index[i][1]][sub_index[i][0]] = \
-                    can_add_conns_InNodePair + update_logical_topo[t][k][sub_index[i][1]][sub_index[i][0]]
+                update_logical_topo[t][k][sub_index[i][1]][sub_index[i][0]] = (
+                    update_logical_topo)[t][k][sub_index[i][0]][sub_index[i][1]]
                 update_logical_topo_cap[t][k][sub_index[i][0]][sub_index[i][1]] = \
                     (can_add_conns_InNodePair * inputs.connection_cap +
                      update_logical_topo[t][k][sub_index[i][0]][sub_index[i][1]] - can_add_conns_InNodePair)
-                update_logical_topo_cap[t][k][sub_index[i][1]][sub_index[i][0]] = \
-                    (can_add_conns_InNodePair * inputs.connection_cap +
-                     update_logical_topo[t][k][sub_index[i][1]][sub_index[i][0]] - can_add_conns_InNodePair)
+                update_logical_topo_cap[t][k][sub_index[i][1]][sub_index[i][0]] = (
+                    update_logical_topo_cap)[t][k][sub_index[i][0]][sub_index[i][1]]
                 update_delta_topo_add[sub_index[i][0]][sub_index[i][1]] -= can_add_conns_InNodePair
                 update_delta_topo_add[sub_index[i][1]][sub_index[i][0]] -= can_add_conns_InNodePair
                 benifit += can_add_conns_InNodePair
             whole_logical_topo += update_logical_topo[t][k]
             whole_logical_topo_cap += update_logical_topo_cap[t][k]
 
-    Logical_topo_weight = (
-        np.empty([inputs.group_num, inputs.oxc_num_a_group, inputs.nodes_num, inputs.nodes_num], dtype=object))
+    Logical_topo_weight = np.empty([inputs.group_num, inputs.oxc_num_a_group, inputs.nodes_num, inputs.nodes_num]
+                                   , dtype=object)
     update_delta_topo_delete_tk = np.empty([inputs.group_num, inputs.oxc_num_a_group], dtype=object)
     deleted_links_all = np.empty([inputs.group_num, inputs.oxc_num_a_group], dtype=object)
     total_benefit = np.empty([inputs.group_num, inputs.oxc_num_a_group], dtype=object)
     new_add_links = np.empty([inputs.group_num, inputs.oxc_num_a_group], dtype=object)
+
     for t in range(0, inputs.group_num):
         for k in range(0, inputs.oxc_num_a_group):
             logical_topo_traffic[t][k] += logical_topo_traffic[t][k].T
@@ -146,9 +146,9 @@ def physical_topo_fu(inputs, delta_topology, traffic_distr, logical_topo_traffic
                     Logical_topo.logical_topo_cap = copy.deepcopy(update_logical_topo_cap[t][k])
                     Logical_topo.logical_topo = update_logical_topo[t][k]
 
-                    total_benefit[t][k], update_topo[t][k], new_add_links[t][k] = cost_delconn_groom.cost_del_conn_groom(inputs, delta_topo, Logical_topo, method)
+                    total_benefit[t][k], update_topo[t][k], new_add_links[t][k] = (
+                        cost_delconn_groom.cost_del_conn_groom(inputs, delta_topo, Logical_topo, method))
 
-        print(total_benefit, new_add_links)
         b_check = 0
         if np.sum(new_add_links) == 0:
             while np.sum(update_delta_topo_add) > 0:

@@ -3,7 +3,6 @@
 作者：TBJ
 日期：2024年06约23日
 """
-import numpy as np
 
 
 # 定义 OXC 各项数据
