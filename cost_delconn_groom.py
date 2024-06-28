@@ -62,7 +62,7 @@ def cost_del_conn_groom(inputs, delta_topo, Logical_topo, method):
                 index_delete_topo_row[i]][index_delete_topo_col[i]]])
         del_index = del_index.astype(int)
         del_index_init = copy.deepcopy(del_index)
-        add_benifit = 0
+        add_benefit = 0
         can_add_conns_InNodePair = np.zeros(len(sub_index))
         for i in range(0, len(sub_index)):
             index_i_degree1 = np.sum(update_logical_topo[sub_index[i][0]])
@@ -70,7 +70,7 @@ def cost_del_conn_groom(inputs, delta_topo, Logical_topo, method):
             max_add_conns_InNodePair = max_links_InNodes - max(index_i_degree1, index_i_degree2)
             require_add_conns_InNodePair = update_delta_add_topo[sub_index[i][0]][sub_index[i][1]]
             can_add_conns_InNodePair[i] = min(require_add_conns_InNodePair, max_add_conns_InNodePair)
-            add_benifit += can_add_conns_InNodePair[i]
+            add_benefit += can_add_conns_InNodePair[i]
 
             update_logical_topo[sub_index[i][0]][sub_index[i][1]] += can_add_conns_InNodePair[i]
             update_logical_topo[sub_index[i][1]][sub_index[i][0]] += can_add_conns_InNodePair[i]
@@ -129,11 +129,11 @@ def cost_del_conn_groom(inputs, delta_topo, Logical_topo, method):
             if method == 1:
                 delete_cost = sum([delta_topo_delete[real_del_sub_index1[k]][real_del_sub_index2[k]] for k in
                                    range(0, len(real_del_sub_index1))])
-                total_cost = add_benifit - delete_cost
+                total_cost = add_benefit - delete_cost
             if method == 2:
                 delete_cost = sum([delta_topo_delete[real_del_sub_index1[k]][real_del_sub_index2[k]] for k in
                                    range(0, len(real_del_sub_index1))])
-                total_cost = add_benifit - delete_cost
+                total_cost = add_benefit - delete_cost
 
             update_topo.update_logical_topo_cap = update_logical_topo_cap
             update_topo.update_logical_topo = update_logical_topo

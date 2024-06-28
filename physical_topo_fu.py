@@ -42,7 +42,7 @@ def physical_topo_fu(inputs, delta_topology, logical_topo_traffic, logical_topo,
                 for j in range(0, len(row0)):
                     if [sub_index_row[i], sub_index_col[i]] == [row0[j], col0[j]]:
                         sub_index.remove([row0[j], col0[j]])
-            benifit = 0
+            benefit = 0
             for i in range(0, len(sub_index)):
                 index_i_degree1 = np.sum(update_logical_topo[t][k][sub_index[i][0]])
                 index_i_degree2 = np.sum(update_logical_topo[t][k][sub_index[i][1]])
@@ -60,12 +60,12 @@ def physical_topo_fu(inputs, delta_topology, logical_topo_traffic, logical_topo,
                     update_logical_topo_cap)[t][k][sub_index[i][0]][sub_index[i][1]]
                 update_delta_topo_add[sub_index[i][0]][sub_index[i][1]] -= can_add_conns_InNodePair
                 update_delta_topo_add[sub_index[i][1]][sub_index[i][0]] -= can_add_conns_InNodePair
-                benifit += can_add_conns_InNodePair
+                benefit += can_add_conns_InNodePair
             whole_logical_topo += update_logical_topo[t][k]
             whole_logical_topo_cap += update_logical_topo_cap[t][k]
 
-    Logical_topo_weight = np.empty([inputs.group_num, inputs.oxc_num_a_group, inputs.nodes_num, inputs.nodes_num]
-                                   , dtype=object)
+    Logical_topo_weight = (
+        np.empty([inputs.group_num, inputs.oxc_num_a_group, inputs.nodes_num, inputs.nodes_num], dtype=object))
     update_delta_topo_delete_tk = np.empty([inputs.group_num, inputs.oxc_num_a_group], dtype=object)
     deleted_links_all = np.empty([inputs.group_num, inputs.oxc_num_a_group], dtype=object)
     total_benefit = np.empty([inputs.group_num, inputs.oxc_num_a_group], dtype=object)

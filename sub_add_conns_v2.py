@@ -130,19 +130,21 @@ def sub_add_conns_v2(inputs, update_logical_topo_weight, update_logical_topo, up
     sub_AddLinks_change = []
     for sub_AddLinks_ind in range(0, len(sub_AddLinks_row)):
         AddLinks_val = tobe_add_topo[sub_AddLinks_row[sub_AddLinks_ind]][sub_AddLinks_col[sub_AddLinks_ind]]
-        sub_AddLinks_change.append(np.tile(sub_AddLinks[sub_AddLinks_ind], AddLinks_val))
+        sub_AddLinks_change.append(np.tile(sub_AddLinks[sub_AddLinks_ind], int(AddLinks_val)))
 
     if len(used_ind) > 0:
         for i in range(0, len(used_ind)):
             benefit[used_ind[i]] = -np.Inf
 
-    mark_row, mark_col = np.argmax(benefit)
+    mark_ind = np.argmax(benefit)
+    mark_row, mark_col = np.unravel_index(mark_ind, benefit.shape)
 
     used_ind.append([mark_row, mark_col])
     rest_add_delta_topo = np.zeros([inputs.nodes_num, inputs.nodes_num])
 
     if len(sub_AddLinks_change) > 0:
-        add_links_tk_topo = add_connections[mark_row][mark_col][:, 0:2]
+        add_links_tk_topo = [add_connections[mark_row][mark_col][k][0:2] for k in
+                             range(0, len(add_connections[mark_row][mark_col]))]
         if add_links_tk_topo:
             del_links_tk_topo = del_conns.del_conns(inputs, add_links_tk_topo, update_logical_topo[mark_row][mark_col],
                                                     del_update_logical_topo_all[mark_row][mark_col])
