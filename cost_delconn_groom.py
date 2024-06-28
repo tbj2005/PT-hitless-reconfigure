@@ -84,9 +84,7 @@ def cost_del_conn_groom(inputs, delta_topo, Logical_topo, method):
             if can_add_conns_InNodePair[i] > 0:
                 value_in_AddNodePairs = np.tile([sub_index[i][0], sub_index[i][1]],
                                                 can_add_conns_InNodePair[i])
-                print(value_in_AddNodePairs, can_add_conns_InNodePair)
                 for j in range(0, 2 * can_add_conns_InNodePair[i]):
-                    print(free_ports, value_in_AddNodePairs, can_add_conns_InNodePair)
                     loc_free_ports = [k if value_in_AddNodePairs[j] == free_ports[k] else -1 for k in range(0, len(
                         free_ports))]
                     loc_free_ports = [k for k in loc_free_ports if k != -1]

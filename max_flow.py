@@ -21,7 +21,6 @@ def max_flow(inputs, match_node, max_match_num):
                 add_connections.append([i, match_node_i[j][0], match_node_i[j][1]])
 
     mf = G.maxflow()
-    print(add_connections)
     DG = G.get_nx_graph()
     del_add = []
     for i in range(0, inputs.nodes_num):

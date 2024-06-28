@@ -12,6 +12,7 @@ def re_add_conns(inputs, logical_topo, Logical_topo_weight, update_delta_topo_ad
                  update_delta_topo_delete):
     index = 1
     links_tobe_add_topo = []
+    del_update_logical_topo = np.empty([inputs.group_num, inputs.oxc_num_a_group], dtype=object)
     while index <= inputs.group_num * inputs.oxc_num_a_group:
         update_logical_topo_try = np.empty([inputs.group_num, inputs.oxc_num_a_group], dtype=object)
         update_logical_topo_weight = np.empty([inputs.group_num, inputs.oxc_num_a_group, inputs.nodes_num,
@@ -26,13 +27,12 @@ def re_add_conns(inputs, logical_topo, Logical_topo_weight, update_delta_topo_ad
                             update_logical_topo_weight[t][k][i][j] = ([0 for _ in range(0, new_add_link_num)] +
                                                                       Logical_topo_weight[t][k][i][j])
                         else:
-                            new_add_link_num = logical_topo[t][k][i][j] - update_logical_topo_try[t][k][i][j]
+                            new_del_link_num = logical_topo[t][k][i][j] - update_logical_topo_try[t][k][i][j]
                             update_logical_topo_weight[t][k][i][j] = \
-                                [Logical_topo_weight[t][k][i][j][n] for n in range(new_add_link_num, len(
+                                [Logical_topo_weight[t][k][i][j][n] for n in range(new_del_link_num, len(
                                     Logical_topo_weight[t][k][i][j]))]
         links_tobe_add_topo = np.zeros([inputs.nodes_num, inputs.nodes_num])
         use_ind = []
-        del_update_logical_topo = np.empty([inputs.group_num, inputs.oxc_num_a_group], dtype=object)
         if index == 1:
             for t in range(0, inputs.group_num):
                 for k in range(0, inputs.oxc_num_a_group):

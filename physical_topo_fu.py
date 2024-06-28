@@ -112,7 +112,7 @@ def physical_topo_fu(inputs, delta_topology, logical_topo_traffic, logical_topo,
     while np.sum(update_delta_topo_add) > 0:
         update_topo = np.empty([inputs.group_num, inputs.oxc_num_a_group], dtype=object)
         deleted_links_all_1 = (
-            np.empty([inputs.group_num, inputs.oxc_num_a_group, inputs.nodes_num, inputs.nodes_num], dtype=int))
+            np.zeros([inputs.group_num, inputs.oxc_num_a_group, inputs.nodes_num, inputs.nodes_num], dtype=int))
         for t in range(0, inputs.group_num):
             for k in range(0, inputs.oxc_num_a_group):
                 InterMid_delta_topo_may = copy.deepcopy(update_delta_topo_delete)
@@ -153,8 +153,9 @@ def physical_topo_fu(inputs, delta_topology, logical_topo_traffic, logical_topo,
         if np.sum(new_add_links) == 0:
             while np.sum(update_delta_topo_add) > 0:
                 b_check += 1
-                re_add_conn.re_add_conns(inputs, logical_topo, Logical_topo_weight, update_delta_topo_add,
-                                         update_logical_topo, update_delta_topo_delete)
+                update_delta_topo_add, update_logical_topo, update_delta_topo_delete = (
+                    re_add_conn.re_add_conns(inputs, logical_topo, Logical_topo_weight, update_delta_topo_add,
+                                             update_logical_topo, update_delta_topo_delete))
         else:
             min_total_benefit = np.max(total_benefit)
             min_row, min_col = np.where(total_benefit == min_total_benefit)
@@ -166,3 +167,5 @@ def physical_topo_fu(inputs, delta_topology, logical_topo_traffic, logical_topo,
             update_delta_topo_delete -= update_delta_topo_del_ed
             update_delta_topo_delete_tk[min_row[0]][min_col[0]] = update_delta_topo_del_ed
             deleted_links_all[min_row[0]][min_col[0]] += update_delta_topo_delete_tk[min_row[0]][min_col[0]]
+
+    return update_logical_topo

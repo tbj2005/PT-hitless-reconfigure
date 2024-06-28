@@ -172,6 +172,7 @@ if ~isempty(sub_addlinks_change)
         %待增加上的链接，add_connections单向
         add_links_tk_topo_bi = [add_links_tk_topo;add_links_tk_topo(:,2),add_links_tk_topo(:,1)];
         for i = 1:size(add_links_tk_topo_bi,1)
+            ismember(sub_addlinks_change,add_links_tk_topo_bi(i,:),'rows')
             idx = find(ismember(sub_addlinks_change,add_links_tk_topo_bi(i,:),'rows'),1);
              if ~isempty(idx)
                 sub_addlinks_change(idx, :) = []; 

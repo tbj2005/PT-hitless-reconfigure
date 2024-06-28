@@ -44,7 +44,6 @@ def sub_add_conns_v2(inputs, update_logical_topo_weight, update_logical_topo, up
                 match_cols = match_cols[0]
                 match_cols = [x for x in match_cols if x not in already_matched_nodes]
                 match_cols = sorted(match_cols)
-                print(match_cols)
                 match_node.append([[match_cols[i], links_tobe_add_topo[node_ind, match_cols[i]]] for i in
                                    range(0, len(match_cols))])
 
@@ -85,7 +84,11 @@ def sub_add_conns_v2(inputs, update_logical_topo_weight, update_logical_topo, up
                     free_ports_before_del1[add_connections1[add_conn_ind][1]] -= 1
                     add_connections1[add_conn_ind][1] = 0
 
-            del_port_row, del_port_col = np.where(add_connections1)
+            if sum([sum(x) for x in add_connections1]) > 0:
+                del_port_row, del_port_col = np.where(add_connections1)
+            else:
+                del_port_row = []
+                del_port_col = []
             del_ports = [add_connections1[del_port_row[i]][del_port_col[i]] for i in range(0, len(del_port_row))]
 
             if len(del_ports) > 0:
@@ -130,7 +133,8 @@ def sub_add_conns_v2(inputs, update_logical_topo_weight, update_logical_topo, up
     sub_AddLinks_change = []
     for sub_AddLinks_ind in range(0, len(sub_AddLinks_row)):
         AddLinks_val = tobe_add_topo[sub_AddLinks_row[sub_AddLinks_ind]][sub_AddLinks_col[sub_AddLinks_ind]]
-        sub_AddLinks_change.append(np.tile(sub_AddLinks[sub_AddLinks_ind], int(AddLinks_val)))
+        for i in range(0, int(AddLinks_val)):
+            sub_AddLinks_change.append(sub_AddLinks[sub_AddLinks_ind])
 
     if len(used_ind) > 0:
         for i in range(0, len(used_ind)):
@@ -166,10 +170,10 @@ def sub_add_conns_v2(inputs, update_logical_topo_weight, update_logical_topo, up
                                                         range(0, len(add_links_tk_topo))]
 
             for i in range(0, len(add_links_tk_topo_bi)):
-                idx_list, _ = np.where([x for x in sub_AddLinks_change if x not in add_links_tk_topo_bi[i]])
-                if idx_list:
-                    idx = idx_list[0]
-                    del sub_AddLinks_change[idx]
+                ismember = [1 if x == add_links_tk_topo_bi[i] else 0 for x in sub_AddLinks_change]
+                if 1 in ismember:
+                    idx_list = ismember.index(1)
+                    del sub_AddLinks_change[idx_list]
 
         for tobe_add_links_ind in range(0, len(sub_AddLinks_change)):
             rest_add_delta_topo[sub_AddLinks_change[tobe_add_links_ind][0]][sub_AddLinks_change[
