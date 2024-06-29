@@ -4,15 +4,24 @@
 日期：2024年06月26日
 """
 import numpy as np
-
+import Input_class
 import sub_add_conns_v2
 
 
 def re_add_conns(inputs, logical_topo, Logical_topo_weight, update_delta_topo_add, update_logical_topo,
                  update_delta_topo_delete):
+    # update_delta_topo_delete = np.zeros_like(update_delta_topo_delete)
+    # update_delta_topo_delete[0][1] = 1
+    # update_delta_topo_delete[1][0] = 1
+    # update_logical_topo[1][0][0][1] = 1
+    # update_logical_topo[1][0][1][0] = 1
+    # update_logical_topo[1][0][1][4] = 0
+    # update_logical_topo[1][0][4][1] = 0
     index = 1
     links_tobe_add_topo = []
     del_update_logical_topo = np.empty([inputs.group_num, inputs.oxc_num_a_group], dtype=object)
+    use_ind = []
+    links_tobe_add_topo = np.zeros([inputs.nodes_num, inputs.nodes_num])
     while index <= inputs.group_num * inputs.oxc_num_a_group:
         update_logical_topo_try = np.empty([inputs.group_num, inputs.oxc_num_a_group], dtype=object)
         update_logical_topo_weight = np.empty([inputs.group_num, inputs.oxc_num_a_group, inputs.nodes_num,
@@ -31,8 +40,7 @@ def re_add_conns(inputs, logical_topo, Logical_topo_weight, update_delta_topo_ad
                             update_logical_topo_weight[t][k][i][j] = \
                                 [Logical_topo_weight[t][k][i][j][n] for n in range(new_del_link_num, len(
                                     Logical_topo_weight[t][k][i][j]))]
-        links_tobe_add_topo = np.zeros([inputs.nodes_num, inputs.nodes_num])
-        use_ind = []
+
         if index == 1:
             for t in range(0, inputs.group_num):
                 for k in range(0, inputs.oxc_num_a_group):

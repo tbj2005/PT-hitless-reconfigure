@@ -11,6 +11,7 @@ import Input_class
 import distr_Traffic
 import convert_inputs
 import physical_topo_fu
+import target_topo_convert
 
 inputs = Input_class.NetworkInformation()
 inputs.nodes_num = 5
@@ -48,6 +49,8 @@ for m in range(1, 2):
 
     delta_topology = Logical_topo_desi - Logical_topo_init_conn
 
-    update_logical_topo = physical_topo_fu.physical_topo_fu(inputs, delta_topology, logical_topo_traffic, logical_topo, logical_topo_cap)
+    update_logical_topo = (
+        physical_topo_fu.physical_topo_fu(inputs, delta_topology, logical_topo_traffic, logical_topo, logical_topo_cap))
 
-    print(update_logical_topo)
+    E = target_topo_convert.target_topo_convert(S_Conn_cap, S, logical_topo, update_logical_topo
+                                                , port_allocation_inti_topo, inputs)

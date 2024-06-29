@@ -141,9 +141,10 @@ def sub_add_conns_v2(inputs, update_logical_topo_weight, update_logical_topo, up
             benefit[used_ind[i]] = -np.Inf
 
     mark_ind = np.argmax(benefit)
-    mark_row, mark_col = np.unravel_index(mark_ind, benefit.shape)
+    mark_row = int(mark_ind % inputs.nodes_num)
+    mark_col = int(mark_ind / inputs.nodes_num)
 
-    used_ind.append([mark_row, mark_col])
+    used_ind.append(mark_ind)
     rest_add_delta_topo = np.zeros([inputs.nodes_num, inputs.nodes_num])
 
     if len(sub_AddLinks_change) > 0:

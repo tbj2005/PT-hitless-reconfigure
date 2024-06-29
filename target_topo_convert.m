@@ -47,8 +47,7 @@ function E1 = target_topo_convert(S_Conn_cap,S,logical_topo,update_logical_topo,
                 S_Conn_cap_1(used_ports_loc,5:7) = 0; %更新S_Conn_cap_1的可用情况%端口交换位置后不更新也无所谓
 
                 %计算应该删除链接及释放的端口
-                for ii = 1:del_logical_topo{t,k}(conn_row(conn_ind),conn_col(conn_ind)) %%此连接需要的端口数
-                    % disp([t,k,conn_ind,ii])
+                for ii = 1:del_logical_topo{t,k}(conn_row(conn_ind),conn_col(conn_ind)) %%此连接需要的端口数% disp([t,k,conn_ind,ii])               
                     E1(sorted_ports1(ii,5),sorted_ports1(ii,6),k,t) = 0; %%确定目标物理拓扑连接
                     E1(sorted_ports1(ii,6),sorted_ports1(ii,5),k,t) = 0; 
                     % S删除一些连接后释放了端口，把释放的端口添加回port_allocation_inti_topo中去，然后计算新的连接
