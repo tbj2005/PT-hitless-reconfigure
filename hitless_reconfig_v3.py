@@ -37,6 +37,27 @@ def hitless_reconfigure(S_numpy, E_numpy, R_in, inputs, port_allocation):
     # G = sum_port // Omega # 每个pod连接到每个oxc上的连接数（这里是取了整，真实情况可能不是这样）
 
     # 初始化空字典，用于存储转换后的数据
+
+    for r in range(0, len(R_in)):
+        for i in range(0, len(R_in[r].route)):
+            if len(R_in[r].route[i]) == 5:
+                if R_in[r].route[i][2] > R_in[r].route[i][3]:
+                    A = 0 + R_in[r].route[i][2]
+                    B = 0 + R_in[r].route[i][3]
+                    R_in[r].route[i][2] = B + 0
+                    R_in[r].route[i][3] = A + 0
+            if len(R_in[r].route[i]) == 9:
+                if R_in[r].route[i][2] > R_in[r].route[i][3]:
+                    A = 0 + R_in[r].route[i][2]
+                    B = 0 + R_in[r].route[i][3]
+                    R_in[r].route[i][2] = B + 0
+                    R_in[r].route[i][3] = A + 0
+                if R_in[r].route[i][6] > R_in[r].route[i][7]:
+                    A = 0 + R_in[r].route[i][6]
+                    B = 0 + R_in[r].route[i][7]
+                    R_in[r].route[i][6] = B + 0
+                    R_in[r].route[i][7] = A + 0
+
     R = {'sou_des': [[R_in[i].source - 1, R_in[i].destination - 1] for i in range(0, len(R_in))],
          'route': [R_in[i].route for i in range(0, len(R_in))]}
 
@@ -46,7 +67,7 @@ def hitless_reconfigure(S_numpy, E_numpy, R_in, inputs, port_allocation):
         for j in range(0, sum_port):
             for k in range(0, K):
                 for t in range(0, T):
-                    if i <= j:
+                    if i > j:
                         S_numpy[i][j][k][t] = 0
                         E_numpy[i][j][k][t] = 0
 

@@ -25,7 +25,7 @@ def target_topo_convert(S_Conn_cap, S, logical_topo, update_logical_topo, port_a
 
             conn_row, conn_col = np.where(np.triu(del_logical_topo[t][k]))
             for conn_ind in range(0, len(conn_row)):
-                zero_rows = [1 if S_Conn_cap_1[k][4] == 0 and S_Conn_cap_1[k][5] == 0 else 0 for k in
+                zero_rows = [1 if S_Conn_cap_1[k][4] == -1 and S_Conn_cap_1[k][5] == -1 else 0 for k in
                              range(0, len(S_Conn_cap_1))]
                 S_Conn_cap_1 = [x for i, x in enumerate(S_Conn_cap_1) if zero_rows[i] != 1]
 
@@ -36,7 +36,7 @@ def target_topo_convert(S_Conn_cap, S, logical_topo, update_logical_topo, port_a
                 pods_port_cap = np.array([S_Conn_cap_1[conn_row_ind[i]][6] for i in range(0, len(conn_row_ind))])
 
                 if method == 2 or method == 3:
-                    sorted_port_cap_ind = np.argsort(pods_port_cap)[::-1]
+                    sorted_port_cap_ind = np.argsort(-1 * pods_port_cap)
                 else:
                     sorted_port_cap_ind = np.argsort(pods_port_cap)
 
