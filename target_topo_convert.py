@@ -40,7 +40,7 @@ def target_topo_convert(S_Conn_cap, S, logical_topo, update_logical_topo, port_a
                 else:
                     sorted_port_cap_ind = np.argsort(pods_port_cap)
 
-                sorted_ports = [S_Conn_cap_1[conn_row_ind[sorted_port_cap_ind[k]]] for k in
+                sorted_ports = [S_Conn_cap_1[conn_row_ind[sorted_port_cap_ind[k]]] + [] for k in
                                 range(0, len(sorted_port_cap_ind))]
                 lia_group = [1 if sorted_ports[n][2] == t and sorted_ports[n][3] == k else 0 for n in
                              range(0, len(sorted_ports))]
@@ -67,7 +67,6 @@ def target_topo_convert(S_Conn_cap, S, logical_topo, update_logical_topo, port_a
 
             conn_row, conn_col = np.where(np.triu(add_logical_topo[t][k]))
             for conn_ind in range(0, len(conn_row)):
-                print(port_allocation_inti_topo[t][k][0])
                 pod_u_col = np.where(port_allocation_inti_topo[t][k][0] == conn_row[conn_ind])
                 pod_u_col = pod_u_col[0]
                 pod_v_col = np.where(port_allocation_inti_topo[t][k][0] == conn_col[conn_ind])

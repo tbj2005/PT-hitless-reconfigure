@@ -129,7 +129,7 @@ def cost_del_conn_groom(inputs, delta_topo, Logical_topo, method):
                                    range(0, len(real_del_sub_index1))])
                 total_cost = add_benefit - delete_cost
             if method == 2:
-                delete_cost = sum([delta_topo_delete[real_del_sub_index1[k]][real_del_sub_index2[k]] for k in
+                delete_cost = sum([delta_topo_delete_weight[real_del_sub_index1[k]][real_del_sub_index2[k]] for k in
                                    range(0, len(real_del_sub_index1))])
                 total_cost = add_benefit - delete_cost
 

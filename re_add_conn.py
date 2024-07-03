@@ -4,21 +4,13 @@
 日期：2024年06月26日
 """
 import numpy as np
-import Input_class
 import sub_add_conns_v2
 
 
 def re_add_conns(inputs, logical_topo, Logical_topo_weight, update_delta_topo_add, update_logical_topo,
                  update_delta_topo_delete):
-    # update_delta_topo_delete = np.zeros_like(update_delta_topo_delete)
-    # update_delta_topo_delete[0][1] = 1
-    # update_delta_topo_delete[1][0] = 1
-    # update_logical_topo[1][0][0][1] = 1
-    # update_logical_topo[1][0][1][0] = 1
-    # update_logical_topo[1][0][1][4] = 0
-    # update_logical_topo[1][0][4][1] = 0
+
     index = 1
-    links_tobe_add_topo = []
     del_update_logical_topo = np.empty([inputs.group_num, inputs.oxc_num_a_group], dtype=object)
     use_ind = []
     links_tobe_add_topo = np.zeros([inputs.nodes_num, inputs.nodes_num])

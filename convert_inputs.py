@@ -138,6 +138,16 @@ def convert_inputs(inputs, flow_path, logical_topo):
                                 if ava_ports[1][ji][6] > 0:
                                     flow_val = min(ava_ports[0][ij][6], ava_ports[1][ji][6], flow_cap_r[jj])
                                     R[r].route.extend([ava_ports[0][ij][2:6] + ava_ports[1][ji][2:6] + [flow_val]])
+                                    if ava_ports[0][ij][4] > ava_ports[0][ij][5]:
+                                        A = R[r].route[-1][2] + 0
+                                        B = R[r].route[-1][3] + 0
+                                        R[r].route[-1][2] = B
+                                        R[r].route[-1][3] = A
+                                    if ava_ports[1][ji][4] > ava_ports[1][ji][5]:
+                                        A = R[r].route[-1][6] + 0
+                                        B = R[r].route[-1][7] + 0
+                                        R[r].route[-1][6] = B
+                                        R[r].route[-1][7] = A
 
                                     t = ava_ports[0][ij][2]
                                     k = ava_ports[0][ij][3]
@@ -146,7 +156,8 @@ def convert_inputs(inputs, flow_path, logical_topo):
 
                                     t1 = ava_ports[1][ji][2]
                                     k1 = ava_ports[1][ji][3]
-                                    logical_topo_traffic[t1][k1][path_hop[jj][1][0] - 1][path_hop[jj][1][1] - 1] += flow_val
+                                    logical_topo_traffic[t1][k1][path_hop[jj][1][0] - 1][path_hop[jj][1][1] - 1] += (
+                                        flow_val)
 
                                     ava_ports[0][ij][6] -= flow_val
                                     ava_ports[1][ji][6] -= flow_val
@@ -187,7 +198,11 @@ def convert_inputs(inputs, flow_path, logical_topo):
                     for ij in range(0, ava_ports_num[0]):
                         if ava_ports[0][ij][6] > 0:
                             flow_value = min(ava_ports[0][ij][6], flow_cap_r[jj])
-                            R[r].route.extend([ava_ports[0][ij][2:6] + [flow_value]])
+                            if ava_ports[0][ij][4] <= ava_ports[0][ij][5]:
+                                R[r].route.extend([ava_ports[0][ij][2:6] + [flow_value]])
+                            else:
+                                R[r].route.extend([ava_ports[0][ij][2:4]] +
+                                                  [ava_ports[0][ij][5], ava_ports[0][ij][4], flow_value])
 
                             t = ava_ports[0][ij][2]
                             k = ava_ports[0][ij][3]

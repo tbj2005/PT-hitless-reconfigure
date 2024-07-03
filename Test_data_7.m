@@ -11,11 +11,11 @@ inputs.physical_conn_oxc = 4; % 一个pod连接到物理
 inputs.maxhop = 2;
 inputs.resi_cap = 0.65;
 
-inputs.request = [2 3 2; 2 4 3];%%每行表示一条需求流量，三元组，源pod，目的pod和带宽需求
-% inputs.request = [2 3 3; 1 4 3;2 4 1];%% 网络比较满，没有可用流量
+% inputs.request = [2 3 2; 2 4 3];%%每行表示一条需求流量，三元组，源pod，目的pod和带宽需求
+inputs.request = [2 3 3; 1 4 3;2 4 1];%% 网络比较满，没有可用流量
 
 
-for m = 1:1
+for m = 2:2
     clearvars -except inputs m stage
     inputs.method = m;
 
@@ -44,9 +44,9 @@ for m = 1:1
     %%%%%%%%%目标物理拓扑接口转化
 
     if inputs.method == 1
-        stage(m) = reconfig_benchmark_fun(S,E,R,inputs,port_allocation);
+        stage = reconfig_benchmark_fun(S,E,R,inputs,port_allocation);
     else
-        stage(m) = reconfig_progress_fun(S,E,R,inputs,port_allocation);% satge = 0代表可以直接加连接
+        stage = reconfig_progress_fun(S,E,R,inputs,port_allocation);% satge = 0代表可以直接加连接
     end
 end
 save stage_test7 stage
