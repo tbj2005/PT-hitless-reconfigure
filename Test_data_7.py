@@ -59,4 +59,4 @@ for m in range(2, 3):
 
     stage = hitless_reconfig_v3.hitless_reconfigure(S, E, R, inputs, port_allocation)
     end = time.time()
-    print(stage, end - start)
+    print('stage', stage, 'time', end - start)
