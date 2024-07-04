@@ -43,19 +43,19 @@ def hitless_reconfigure(S_numpy, E_numpy, R_in, inputs, port_allocation):
             if len(R_in[r].route[i]) == 5:
                 if R_in[r].route[i][2] > R_in[r].route[i][3]:
                     A = 0 + R_in[r].route[i][2]
-                    B = 0 + R_in[r].route[i][3]
-                    R_in[r].route[i][2] = B + 0
+                    C = 0 + R_in[r].route[i][3]
+                    R_in[r].route[i][2] = C + 0
                     R_in[r].route[i][3] = A + 0
             if len(R_in[r].route[i]) == 9:
                 if R_in[r].route[i][2] > R_in[r].route[i][3]:
                     A = 0 + R_in[r].route[i][2]
-                    B = 0 + R_in[r].route[i][3]
-                    R_in[r].route[i][2] = B + 0
+                    C = 0 + R_in[r].route[i][3]
+                    R_in[r].route[i][2] = C + 0
                     R_in[r].route[i][3] = A + 0
                 if R_in[r].route[i][6] > R_in[r].route[i][7]:
                     A = 0 + R_in[r].route[i][6]
-                    B = 0 + R_in[r].route[i][7]
-                    R_in[r].route[i][6] = B + 0
+                    C = 0 + R_in[r].route[i][7]
+                    R_in[r].route[i][6] = C + 0
                     R_in[r].route[i][7] = A + 0
 
     R = {'sou_des': [[R_in[i].source - 1, R_in[i].destination - 1] for i in range(0, len(R_in))],
@@ -200,7 +200,7 @@ def hitless_reconfigure(S_numpy, E_numpy, R_in, inputs, port_allocation):
                                 Distri_pod['occupy'][results][-1]['Band_occupy'].append(0)
                                 Distri_pod['occupy'][results][-1]['Req'].append([])
 
-                    else:  # xin_zeng_de pod pairs connections
+                    else:  # xinzengde pod pairs connections
                         Distri_pod['pod_pairs'].append([index[0], index[1]])
                         Distri_pod['connections'].append([])
                         Distri_pod['connections'][-1].append([i, index[2]])
@@ -245,8 +245,8 @@ def hitless_reconfigure(S_numpy, E_numpy, R_in, inputs, port_allocation):
                     k = index[0]
                     l = index[1]
 
-                    # pan duan neng fou chai chu pan duan de fang fa jiu shi kan ci lian ge pod zhi jian shi fou cun
-                    # zai qi ta de ke ti dai lian jie
+                    # pan duan neng fou chai chu
+                    # pan duan de fang fa shi kan ci lian ge pod zhi jian shi fou cun zai qi ta de ke ti dai lian jie
                     seq = find_list_in_dict(Distri_pod, [k, l], 'pod_pairs')
                     nested_array = np.array(Distri_pod['connections'][seq])  # transform to numpy array
                     inseq = np.where((nested_array == [item, j]).all(axis=1))[0]
@@ -309,14 +309,13 @@ def hitless_reconfigure(S_numpy, E_numpy, R_in, inputs, port_allocation):
 
                                             if Times == 0:  # the first piece
                                                 Distri_pod['occupy'][seq][Alter_list[0][o]]['Req'][
-                                                    Alter_list[1][o]].append(
-                                                    Record[0][Elem])
+                                                    Alter_list[1][o]].append(Record[0][Elem])
                                                 # modify R
                                                 R['route'][Record[0][Elem][0]][Record[0][Elem][1]][-1] = can_serve
                                                 R['route'][Record[0][Elem][0]][Record[0][Elem][1]][loc] = \
-                                                    Distri_pod['connections'][seq][Alter_list[0][o]][0]
+                                                Distri_pod['connections'][seq][Alter_list[0][o]][0]
                                                 R['route'][Record[0][Elem][0]][Record[0][Elem][1]][loc + 1] = \
-                                                    Distri_pod['connections'][seq][Alter_list[0][o]][1]
+                                                Distri_pod['connections'][seq][Alter_list[0][o]][1]
 
                                             else:
                                                 # modify R
@@ -366,14 +365,11 @@ def hitless_reconfigure(S_numpy, E_numpy, R_in, inputs, port_allocation):
                                                     nested_array_1 = np.array(
                                                         copy_Distri['connections'][seq_1])  # transform to numpy array
                                                     inseq_1 = \
-                                                        np.where((nested_array_1 == [judge[0], judge[1]]).all(axis=1))[
-                                                            0]
-                                                    for b in range(
-                                                            len(copy_Distri['occupy'][seq_1][inseq_1[0]][
-                                                                    'Band_occupy'])):
-                                                        for c in range(
-                                                                len(copy_Distri['occupy'][seq_1][inseq_1[0]]['Req'][
-                                                                        b])):
+                                                    np.where((nested_array_1 == [judge[0], judge[1]]).all(axis=1))[0]
+                                                    for b in range(len(
+                                                            copy_Distri['occupy'][seq_1][inseq_1[0]]['Band_occupy'])):
+                                                        for c in range(len(
+                                                                copy_Distri['occupy'][seq_1][inseq_1[0]]['Req'][b])):
                                                             if copy_Distri['occupy'][seq_1][inseq_1[0]]['Req'][b][c] == \
                                                                     Record[0][o]:
                                                                 j_break = 1
@@ -420,8 +416,7 @@ def hitless_reconfigure(S_numpy, E_numpy, R_in, inputs, port_allocation):
                                                             FLAG += 1  # 当FLAG = 1时表示第一次分割请求，放入copy_R的原始位置
                                                             portion = min(
                                                                 B - copy_Distri['occupy'][seq_1][o_1]['Band_occupy'][
-                                                                    o_2],
-                                                                Record[1][o])
+                                                                    o_2], Record[1][o])
                                                             if FLAG == 1:
                                                                 copyR_List[o][Record[0][o][1]] = [
                                                                     copy_Distri['connections'][seq_1][o_1][0],
@@ -435,8 +430,7 @@ def hitless_reconfigure(S_numpy, E_numpy, R_in, inputs, port_allocation):
                                                                 copyR_List[o].append(
                                                                     [copy_Distri['connections'][seq_1][o_1][0],
                                                                      copy_Distri['connections'][seq_1][o_1][1],
-                                                                     flow_sou,
-                                                                     flow_des, portion])
+                                                                     flow_sou, flow_des, portion])
                                                                 copy_Distri['occupy'][seq_1][o_1]['Band_occupy'][
                                                                     o_2] += portion
                                                                 copy_Distri['occupy'][seq_1][o_1]['Req'][o_2].append(
@@ -472,8 +466,7 @@ def hitless_reconfigure(S_numpy, E_numpy, R_in, inputs, port_allocation):
                                                                 copyR_List[o].append(
                                                                     [copy_Distri['connections'][seq_1][o_1][0],
                                                                      copy_Distri['connections'][seq_1][o_1][1],
-                                                                     flow_sou,
-                                                                     flow_des, portion])
+                                                                     flow_sou, flow_des, portion])
                                                                 copy_Distri['occupy'][seq_1][o_1]['Band_occupy'][
                                                                     o_2] = B
                                                                 copy_Distri['occupy'][seq_1][o_1]['Req'][o_2].append(
@@ -517,18 +510,16 @@ def hitless_reconfigure(S_numpy, E_numpy, R_in, inputs, port_allocation):
                                                         o_4 = 0
 
                                                         while Record[1][o] > 0:
-                                                            while len(
-                                                                    copy_Distri['occupy'][seq_1][o_1][
-                                                                        'Band_occupy']) == 0:
+                                                            while len(copy_Distri['occupy'][seq_1][o_1][
+                                                                          'Band_occupy']) == 0:
                                                                 o_1 += 1
                                                                 if o_1 >= len(copy_Distri['connections'][seq_1]):
                                                                     break
                                                             if o_1 >= len(copy_Distri['connections'][seq_1]):
                                                                 break
 
-                                                            while len(
-                                                                    copy_Distri['occupy'][seq_2][o_3][
-                                                                        'Band_occupy']) == 0:
+                                                            while len(copy_Distri['occupy'][seq_2][o_3][
+                                                                          'Band_occupy']) == 0:
                                                                 o_3 += 1
                                                                 if o_3 >= len(copy_Distri['connections'][seq_2]):
                                                                     break
@@ -540,45 +531,36 @@ def hitless_reconfigure(S_numpy, E_numpy, R_in, inputs, port_allocation):
                                                                     copy_Distri['occupy'][seq_2][o_3]['Band_occupy'][
                                                                         o_4] != B:
                                                                 FLAG += 1  # 当FLAG = 1时表示第一次分割请求，放入copy_R的原始位置
-                                                                capa = min(
-                                                                    B -
-                                                                    copy_Distri['occupy'][seq_1][o_1]['Band_occupy'][
-                                                                        o_2],
-                                                                    B -
-                                                                    copy_Distri['occupy'][seq_2][o_3]['Band_occupy'][
-                                                                        o_4])
+                                                                capa = min(B - copy_Distri['occupy'][seq_1][o_1][
+                                                                    'Band_occupy'][o_2], B -
+                                                                           copy_Distri['occupy'][seq_2][o_3][
+                                                                               'Band_occupy'][o_4])
                                                                 portion = min(capa, Record[1][o])
 
                                                                 if FLAG == 1:
                                                                     copyR_List[o][Record[0][o][1]] = [
                                                                         copy_Distri['connections'][seq_1][o_1][0],
                                                                         copy_Distri['connections'][seq_1][o_1][1],
-                                                                        pod_fir,
-                                                                        pod_sec,
+                                                                        pod_fir, pod_sec,
                                                                         copy_Distri['connections'][seq_2][o_3][0],
                                                                         copy_Distri['connections'][seq_2][o_3][1],
-                                                                        pod_thi,
-                                                                        pod_fou, portion]
+                                                                        pod_thi, pod_fou, portion]
                                                                     copy_Distri['occupy'][seq_1][o_1]['Band_occupy'][
                                                                         o_2] += portion
                                                                     copy_Distri['occupy'][seq_1][o_1]['Req'][
-                                                                        o_2].append(
-                                                                        Record[0][o])
+                                                                        o_2].append(Record[0][o])
                                                                     copy_Distri['occupy'][seq_2][o_3]['Band_occupy'][
                                                                         o_4] += portion
                                                                     copy_Distri['occupy'][seq_2][o_3]['Req'][
-                                                                        o_4].append(
-                                                                        Record[0][o])
+                                                                        o_4].append(Record[0][o])
                                                                 else:
                                                                     copyR_List[o].append(
                                                                         [copy_Distri['connections'][seq_1][o_1][0],
                                                                          copy_Distri['connections'][seq_1][o_1][1],
-                                                                         pod_fir,
-                                                                         pod_sec,
+                                                                         pod_fir, pod_sec,
                                                                          copy_Distri['connections'][seq_2][o_3][0],
                                                                          copy_Distri['connections'][seq_2][o_3][1],
-                                                                         pod_thi,
-                                                                         pod_fou, portion])
+                                                                         pod_thi, pod_fou, portion])
                                                                     copy_Distri['occupy'][seq_1][o_1]['Band_occupy'][
                                                                         o_2] += portion
                                                                     copy_Distri['occupy'][seq_1][o_1]['Req'][
@@ -599,9 +581,8 @@ def hitless_reconfigure(S_numpy, E_numpy, R_in, inputs, port_allocation):
                                                             if copy_Distri['occupy'][seq_1][o_1]['Band_occupy'][
                                                                 o_2] == B:
                                                                 o_2 += 1
-                                                                if o_2 >= len(
-                                                                        copy_Distri['occupy'][seq_1][o_1][
-                                                                            'Band_occupy']):
+                                                                if o_2 >= len(copy_Distri['occupy'][seq_1][o_1][
+                                                                                  'Band_occupy']):
                                                                     o_1 += 1
                                                                     o_2 = 0
                                                                     if o_1 >= len(copy_Distri['connections'][seq_1]):
@@ -610,9 +591,8 @@ def hitless_reconfigure(S_numpy, E_numpy, R_in, inputs, port_allocation):
                                                             if copy_Distri['occupy'][seq_2][o_3]['Band_occupy'][
                                                                 o_4] == B:
                                                                 o_4 += 1
-                                                                if o_4 >= len(
-                                                                        copy_Distri['occupy'][seq_2][o_3][
-                                                                            'Band_occupy']):
+                                                                if o_4 >= len(copy_Distri['occupy'][seq_2][o_3][
+                                                                                  'Band_occupy']):
                                                                     o_3 += 1
                                                                     o_4 = 0
                                                                     if o_3 >= len(copy_Distri['connections'][seq_2]):

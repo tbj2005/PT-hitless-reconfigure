@@ -76,7 +76,7 @@ def target_topo_convert(S_Conn_cap, S, logical_topo, update_logical_topo, port_a
                     E1[pod_u_col[ii]][pod_v_col[ii]][k][t] = 1
                     E1[pod_v_col[ii]][pod_u_col[ii]][k][t] = 1
 
-                    port_allocation_inti_topo[t][k][0][pod_u_col[ii]] = 0
-                    port_allocation_inti_topo[t][k][0][pod_v_col[ii]] = 0
+                    port_allocation_inti_topo[t][k][0][pod_u_col[ii]] = -1
+                    port_allocation_inti_topo[t][k][0][pod_v_col[ii]] = -1
 
     return E1

@@ -20,6 +20,20 @@ class NetworkInformation:
         self.resi_cap = 0  # 平滑重构时空闲容量占比 \eta
         self.method = 0  # 物理拓扑计算方案，取值1-3
         self.request = []  # 通信需求三元组[S, D, R]
+        self.cap_ratio = []
+        self.num_requests = 0
+
+
+class StimulateInformation:
+    def __init__(self):
+        self.nodes_num = []
+        self.group_num = []
+        self.oxc_ports = []
+        self.oxc_num_a_group = []
+        self.connection_cap = []
+        self.physical_conn_oxc = []
+        self.max_num_requests = []
+        self.cap_ratio = []
 
 
 class Request:

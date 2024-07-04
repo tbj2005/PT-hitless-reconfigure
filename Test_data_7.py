@@ -25,7 +25,7 @@ inputs.physical_conn_oxc = 4
 inputs.max_hop = 2
 inputs.resi_cap = 0.65
 
-# inputs.request = [[2, 3, 2], [2, 4, 3]]
+inputs.request = [[2, 3, 2], [2, 4, 3]]
 inputs.request = [[2, 3, 3], [1, 4, 3], [2, 4, 1]]  # 网络流量较满，无法疏导的情况
 
 T = inputs.group_num

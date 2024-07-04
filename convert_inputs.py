@@ -23,7 +23,7 @@ def convert_inputs(inputs, flow_path, logical_topo):
     T = inputs.group_num  # group 数目
     sum_port = inputs.oxc_ports  # 每个 oxc 的端口总数
     K = inputs.oxc_num_a_group  # 一个 group 内 oxc 数目
-    B = inputs.connection_cap  # 连接带宽容量
+    B = inputs.connection_cap + 0  # 连接带宽容量
     request = inputs.request  # 需求流量
     req_num = len(request)  # 需求流量数目
     ave = int(sum_port / Omega)  # 端口数目向下均分，即一个 pod 上的 oxc 端口数目
