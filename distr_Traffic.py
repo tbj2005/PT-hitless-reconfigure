@@ -100,7 +100,7 @@ def distr_Traffic(init_topo_cap, inputs):
         # 若流量不满足要求，标记之
         if flow_rest_cap > 0:
             break_flag = 1
-            unavail_flow += [request[r][0], request[r][1], flow_rest_cap]
+            unavail_flow.append([request[r][0], request[r][1], flow_rest_cap])
         else:
             # 若流量满足要求，更新 traffic_distr 矩阵，矩阵中每个元素的位置表示流量位于哪两个 pod 间
             # 元素为一个元胞数组，数组中的每个元素都为一个三元组[S,D,R]，表示这条流的源和目的 pod 与带宽分配

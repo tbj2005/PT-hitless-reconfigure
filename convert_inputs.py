@@ -68,7 +68,7 @@ def convert_inputs(inputs, flow_path, logical_topo):
                 pod_u_col = pod_u_col[0]
                 pod_v_col = np.where(port_allocation_inti_topo[t][k][0][:] == conn_col[conn_ind])
                 pod_v_col = pod_v_col[0]
-                for ii in range(0, logical_topo[t, k][conn_row[conn_ind], conn_col[conn_ind]]):
+                for ii in range(0, int(logical_topo[t, k][conn_row[conn_ind], conn_col[conn_ind]])):
                     S[pod_u_col[ii], pod_v_col[ii], k, t] = 1
                     S[pod_v_col[ii], pod_u_col[ii], k, t] = 1  # 标记这两个 oxc 上的 port 相连
                     S_Conn.append([conn_row[conn_ind], conn_col[conn_ind], t, k, pod_u_col[ii], pod_v_col[ii]])

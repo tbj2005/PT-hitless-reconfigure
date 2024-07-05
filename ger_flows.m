@@ -5,10 +5,10 @@ function flow_requests = ger_flows(inputs,Logical_topo_init_cap,topo_index)
     flow_requests  = [];
     flow_requests_num = 0;
     [sour_row,dest_col] = find(triu(Logical_topo_init_cap));
-while flow_requests_num < inputs.num_requests
-    if isempty(sour_row)
-        break
-    end
+    while flow_requests_num < inputs.num_requests
+        if isempty(sour_row)
+            break
+        end
         hop1_ava_req = size(sour_row,1);
         rand_req_ind = randi([1,hop1_ava_req]);
         source = sour_row(rand_req_ind);
@@ -36,5 +36,5 @@ while flow_requests_num < inputs.num_requests
                 flow_requests_num = flow_requests_num +1;
             end
         end
-end
+    end
    

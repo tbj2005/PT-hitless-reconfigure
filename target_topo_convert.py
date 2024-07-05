@@ -47,7 +47,7 @@ def target_topo_convert(S_Conn_cap, S, logical_topo, update_logical_topo, port_a
                 group_row = np.where(lia_group)[0]
                 sorted_ports1 = [sorted_ports[group_row[n]] for n in range(0, len(group_row))]
 
-                used_ports_num = del_logical_topo[t][k][conn_row[conn_ind]][conn_col[conn_ind]]
+                used_ports_num = int(del_logical_topo[t][k][conn_row[conn_ind]][conn_col[conn_ind]])
                 used_index = np.where(lia_group)[0]
                 if used_ports_num < len(used_index):
                     used_index = used_index[:used_ports_num]
@@ -58,7 +58,7 @@ def target_topo_convert(S_Conn_cap, S, logical_topo, update_logical_topo, port_a
                     S_Conn_cap_1[used_ports_loc[i]][5] = -1
                     S_Conn_cap_1[used_ports_loc[i]][6] = 0
 
-                for ii in range(0, del_logical_topo[t][k][conn_row[conn_ind]][conn_col[conn_ind]]):
+                for ii in range(0, int(del_logical_topo[t][k][conn_row[conn_ind]][conn_col[conn_ind]])):
                     E1[sorted_ports1[ii][4]][sorted_ports1[ii][5]][k][t] = 0
                     E1[sorted_ports1[ii][5]][sorted_ports1[ii][4]][k][t] = 0
 

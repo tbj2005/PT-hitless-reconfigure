@@ -4,6 +4,8 @@
 日期：2024年06约25日
 """
 import copy
+import time
+
 import numpy as np
 import Input_class
 
@@ -36,25 +38,30 @@ def cost_del_conn_groom(inputs, delta_topo, Logical_topo, method):
         sub_index_row = sort_add_delta_topo_ind % inputs.nodes_num
         row0, col0 = np.where(triu_delta_topo_add == 0)
         sub_index = []
+        del_sub = []
         for i in range(0, len(sub_index_row)):
-            sub_index.append([sub_index_row[i], sub_index_col[i]])
-        for i in range(0, len(sub_index_row)):
+            if reshape_triu_delta_topo_add[sort_add_delta_topo_ind[i]] > 0:
+                sub_index.append([sub_index_row[i], sub_index_col[i]])
+            else:
+                break
+        for i in range(0, len(sub_index)):
             for j in range(0, len(row0)):
-                if [sub_index_row[i], sub_index_col[i]] == [row0[j], col0[j]]:
-                    sub_index.remove([row0[j], col0[j]])
+                if [sub_index[i][0], sub_index[i][1]] == [row0[j], col0[j]]:
+                    del_sub.append(i)
+                    break
+        sub_index = [sub_index[i] for i in range(0, len(sub_index)) if i not in del_sub]
         for i in range(0, len(sub_index)):
             index_i_degree1_1 = np.sum(logical_topo[sub_index[i][0]])
             index_i_degree2_1 = np.sum(logical_topo[sub_index[i][1]])
             if max_links_InNodes - index_i_degree1_1 > 0:
-                free_ports += [sub_index[i][0] for _ in range(0, max_links_InNodes - index_i_degree1_1)]
+                free_ports += [sub_index[i][0] for _ in range(0, int(max_links_InNodes - index_i_degree1_1))]
             if max_links_InNodes - index_i_degree2_1 > 0:
-                free_ports += [sub_index[i][1] for _ in range(0, max_links_InNodes - index_i_degree2_1)]
+                free_ports += [sub_index[i][1] for _ in range(0, int(max_links_InNodes - index_i_degree2_1))]
 
         after_delete_topo = logical_topo - delta_topo_delete
         after_delete_topo[after_delete_topo < 0] = 0
         update_delta_add_topo = copy.deepcopy(delta_topo_add)
         update_logical_topo = copy.deepcopy(after_delete_topo)
-
         index_delete_topo_row, index_delete_topo_col = np.where(np.triu(delta_topo_delete))
         del_index = np.zeros([len(index_delete_topo_row), 3])
         for i in range(0, len(index_delete_topo_row)):
