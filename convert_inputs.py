@@ -99,8 +99,8 @@ def convert_inputs(inputs, flow_path, logical_topo):
     R = []  # 需求结构体
     for r in range(0, req_num):
         R.append(Input_class.Request())
-        R[r].source = request[r][0]
-        R[r].destination = request[r][1]
+        R[r].source = request[r][0] - 1
+        R[r].destination = request[r][1] - 1
         R[r].demands = request[r][2]
         R[r].route = []
         for n in range(0, len(flow_path[r])):
@@ -116,7 +116,7 @@ def convert_inputs(inputs, flow_path, logical_topo):
                 ava_ports = []
                 ava_ports_num = []  # 存储可以用于传输该路由方案每一跳的连接数目
                 for ii in range(0, len(path_hop[jj])):  # 循环一次或两次，对应流为一跳或两跳
-                    Lialoc = [1 if S_Conn_cap[k][0:2] == [path_hop[jj][ii][n] - 1 for n in range(0, 2)]
+                    Lialoc = [1 if S_Conn_cap[k][0:2] == [path_hop[jj][ii][n] for n in range(0, 2)]
                               else 0 for k in range(0, len(S_Conn))]
                     # 匹配 pod 连接情况与这一跳的路由方案
                     ava_ports_num.append(sum(Lialoc))
@@ -142,11 +142,11 @@ def convert_inputs(inputs, flow_path, logical_topo):
                                     t = ava_ports[0][ij][2]
                                     k = ava_ports[0][ij][3]
                                     sub_path = path_hop[jj][0][0:2]
-                                    logical_topo_traffic[t][k][sub_path[0] - 1][sub_path[1] - 1] += flow_val
+                                    logical_topo_traffic[t][k][sub_path[0]][sub_path[1]] += flow_val
 
                                     t1 = ava_ports[1][ji][2]
                                     k1 = ava_ports[1][ji][3]
-                                    logical_topo_traffic[t1][k1][path_hop[jj][1][0] - 1][path_hop[jj][1][1] - 1] += (
+                                    logical_topo_traffic[t1][k1][path_hop[jj][1][0]][path_hop[jj][1][1]] += (
                                         flow_val)
 
                                     ava_ports[0][ij][6] -= flow_val
@@ -192,7 +192,7 @@ def convert_inputs(inputs, flow_path, logical_topo):
 
                             t = ava_ports[0][ij][2]
                             k = ava_ports[0][ij][3]
-                            logical_topo_traffic[t][k][path_hop[0][0][0] - 1][path_hop[0][0][1] - 1] += flow_value
+                            logical_topo_traffic[t][k][path_hop[0][0][0]][path_hop[0][0][1]] += flow_value
 
                             flow_cap_r[jj] -= flow_value
                             ava_ports[0][ij][6] -= flow_value

@@ -98,7 +98,7 @@ def sub_add_conns_v2(inputs, update_logical_topo_weight, update_logical_topo, up
                     if_in[che_ind] = sum(lia)
 
                 sert_ind = np.argsort(if_in)
-                del_links_topo_sorted = del_links_topo[sert_ind]
+                del_links_topo_sorted = np.array([del_links_topo[sert_ind[x]] for x in range(0, len(sert_ind))])
 
                 del_links_topo1 = copy.deepcopy(del_links_topo_sorted)
 
@@ -109,7 +109,7 @@ def sub_add_conns_v2(inputs, update_logical_topo_weight, update_logical_topo, up
 
                 del_real_row, _ = np.where(del_links_topo1 == 0)
                 del_real_row = sorted(list(set(del_real_row)))
-                del_links_real[t][k] = del_links_topo[del_real_row, :]
+                del_links_real[t][k] = np.array([del_links_topo[del_real_row[x]] for x in range(0, len(del_real_row))])
                 add_del_num[t][k] = len(del_links_real)
 
                 for del_real_ind in range(0, len(del_links_real[t][k])):
@@ -159,10 +159,9 @@ def sub_add_conns_v2(inputs, update_logical_topo_weight, update_logical_topo, up
             for add_links_tk_topo_ind in range(0, len(add_links_tk_topo)):
                 add_row = add_links_tk_topo[add_links_tk_topo_ind][0]
                 add_col = add_links_tk_topo[add_links_tk_topo_ind][1]
-                update_logical_topo[mark_row][mark_col][add_row][add_col] = update_logical_topo[mark_row][mark_col][
-                    add_row][add_col] + 1
+                update_logical_topo[mark_row][mark_col][add_row][add_col] += 1
                 update_logical_topo[mark_row][mark_col][add_col][add_row] = update_logical_topo[mark_row][mark_col][
-                    add_row][add_col]
+                    add_row][add_col] + 0
 
             update_delta_topo_del -= del_links_tk_topo + del_links_tk_topo.T
             update_delta_topo_del[update_delta_topo_del < 0] = 0

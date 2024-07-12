@@ -102,6 +102,7 @@ for t = 1:inputs.groupnum
                 del_links_real{t,k} = del_links_topo(del_real_row,:);
                 add_del_num(t,k) = size(del_links_real{t,k},1);
                 %%删除连接的数目要减去update_delta_topo_del中的链接，最后在后边判断，如果该链接被删除了更新
+                %%                                                                                                           
                 for del_real_ind = 1:size(del_links_real{t,k},1)
                     if update_delta_topo_del(del_links_real{t,k}(del_real_ind,1),del_links_real{t,k}(del_real_ind,2)) > 0
                         add_del_num(t,k) = add_del_num(t,k) - 1; %%去除本来就应该删除的链接之后要删除的链接

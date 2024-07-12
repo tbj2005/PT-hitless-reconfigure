@@ -23,30 +23,35 @@ def distr_Traffic(init_topo_cap, inputs):
     flow_path = np.empty(len(request), dtype=object)
     unavail_flow = []
     for r in range(0, len(request)):
-        source = request[r][0]
-        destination = request[r][1]
+        source = request[r][0] - 1
+        destination = request[r][1] - 1
         flow_capacity = request[r][2]
         hop1_path = []
         hop2_path = []
-        col1 = np.nonzero(path_topo[source - 1, :])[0] + np.ones(np.count_nonzero(path_topo[source - 1, :]))
-        col1 = col1.astype(int)  # 该数组存放以需求流量源 pod 为源，可以与源直连的所有 pod
+        col1 = np.where(path_topo[source])
+        col1 = col1[0]
+        # col1 = np.nonzero(path_topo[source - 1, :])[0] + np.ones(np.count_nonzero(path_topo[source - 1, :]))
+        # col1 = col1.astype(int)  # 该数组存放以需求流量源 pod 为源，可以与源直连的所有 pod
         # 寻找所有需求流量对应的一跳和两跳路径
         for ii in range(0, len(col1)):
             if col1[ii] == destination:  # 直连可以满足需求且直连剩余带宽容量足够
-                hop1_path = [source, destination, path_topo[source - 1, destination - 1]]
+                hop1_path = [source, destination, path_topo[source, destination]]
             else:
-                col2 = np.nonzero(path_topo[col1[ii] - 1, :])[0] + np.ones(np.count_nonzero(path_topo[col1[ii] - 1, :]))
-                col2 = col2.astype(int)  # 该数组存放以源 pod 可直连 pod ii 为中间 pod，中间 pod ii  可连接的所有其他 pod
-                col3 = np.where(col2 == destination)[0] + 1
+                # col2 = np.nonzero(path_topo[col1[ii] - 1, :])[0] +
+                # np.ones(np.count_nonzero(path_topo[col1[ii] - 1, :]))
+                # col2 = col2.astype(int)  # 该数组存放以源 pod 可直连 pod ii 为中间 pod，中间 pod ii  可连接的所有其他 pod
+                col2 = np.where(path_topo[col1[ii]])
+                col2 = col2[0]
+                col3 = np.where(col2 == destination)[0]
                 Next = col1[ii]
-                if col3:  # 如果通过中间 pod ii 可以到达目的 pod，说明两跳路径存在
-                    hop2_path.append([[source, Next, path_topo[source - 1, Next - 1]],
-                                      [Next, destination, path_topo[Next - 1, destination - 1]]])
+                if len(col3) > 0:  # 如果通过中间 pod ii 可以到达目的 pod，说明两跳路径存在
+                    hop2_path.append([[source, Next, path_topo[source, Next]],
+                                      [Next, destination, path_topo[Next, destination]]])
 
         # 为流量分配路径
         flag = 0
         if hop1_path:  # 一跳链路不为空，则尽量直连
-            if path_topo[source - 1, destination - 1] >= flow_capacity:  # 直连可以满足带宽要求
+            if path_topo[source, destination] >= flow_capacity:  # 直连可以满足带宽要求
                 flow_rest_cap = 0
                 link_rest_cap = hop1_path[2] - flow_capacity
                 path_topo[hop1_path[0], hop1_path[1]] = link_rest_cap
@@ -55,8 +60,8 @@ def distr_Traffic(init_topo_cap, inputs):
             else:  # 直连带宽不足，但是还是要用完所有直连带宽
                 flow_path[r] = [[hop1_path[0], hop1_path[1], hop1_path[2]]]
                 link_rest_cap = 0
-                path_topo[hop1_path[0] - 1, hop1_path[1] - 1] = link_rest_cap
-                path_topo[hop1_path[1] - 1, hop1_path[0] - 1] = link_rest_cap
+                path_topo[hop1_path[0], hop1_path[1]] = link_rest_cap
+                path_topo[hop1_path[1], hop1_path[0]] = link_rest_cap
                 flow_rest_cap = flow_capacity - hop1_path[2]
                 flag = 1
         else:  # 一开始就没有直连链路
@@ -67,18 +72,18 @@ def distr_Traffic(init_topo_cap, inputs):
         if flag == 1:  # 直连带宽用完之后如果还没有满足流量需求
             used_path = copy.deepcopy(hop2_path)
             for i in range(0, len(hop2_path)):
-                link_rest_cap1 = path_topo[hop2_path[i][0][0] - 1, hop2_path[i][0][1] - 1]
-                link_rest_cap2 = path_topo[hop2_path[i][1][0] - 1, hop2_path[i][1][1] - 1]
+                link_rest_cap1 = path_topo[hop2_path[i][0][0], hop2_path[i][0][1]]
+                link_rest_cap2 = path_topo[hop2_path[i][1][0], hop2_path[i][1][1]]
                 min_path_cap = min(link_rest_cap1, link_rest_cap2)
                 if min_path_cap >= flow_rest_cap:  # 该两跳路径上的带宽容量可以满足剩余需求
                     used_path[i][0][2] = flow_rest_cap
                     used_path[i][1][2] = flow_rest_cap
                     flow_path[r] += used_path[i]
 
-                    path_topo[hop2_path[i][0][0] - 1, hop2_path[i][0][1] - 1] -= flow_rest_cap
-                    path_topo[hop2_path[i][0][1] - 1, hop2_path[i][0][0] - 1] -= flow_rest_cap
-                    path_topo[hop2_path[i][1][0] - 1, hop2_path[i][1][1] - 1] -= flow_rest_cap
-                    path_topo[hop2_path[i][1][1] - 1, hop2_path[i][1][0] - 1] -= flow_rest_cap
+                    path_topo[hop2_path[i][0][0], hop2_path[i][0][1]] -= flow_rest_cap
+                    path_topo[hop2_path[i][0][1], hop2_path[i][0][0]] -= flow_rest_cap
+                    path_topo[hop2_path[i][1][0], hop2_path[i][1][1]] -= flow_rest_cap
+                    path_topo[hop2_path[i][1][1], hop2_path[i][1][0]] -= flow_rest_cap
                     # 更新剩余带宽资源
                     flow_rest_cap = 0
                     break
@@ -86,14 +91,14 @@ def distr_Traffic(init_topo_cap, inputs):
                     used_path[i][0][2] = min_path_cap
                     used_path[i][1][2] = min_path_cap
                     flow_rest_cap -= min_path_cap
-                    path_topo[hop2_path[i][0][0] - 1, hop2_path[i][0][1] - 1] = max(0, (
-                            path_topo[hop2_path[i][0][0] - 1, hop2_path[i][0][1] - 1] - min_path_cap))
-                    path_topo[hop2_path[i][0][1] - 1, hop2_path[i][0][0] - 1] = max(0, (
-                            path_topo[hop2_path[i][0][1] - 1, hop2_path[i][0][0] - 1] - min_path_cap))
-                    path_topo[hop2_path[i][1][0] - 1, hop2_path[i][1][1] - 1] = max(0, (
-                            path_topo[hop2_path[i][1][0] - 1, hop2_path[i][1][1] - 1] - min_path_cap))
-                    path_topo[hop2_path[i][1][1] - 1, hop2_path[i][1][0] - 1] = max(0, (
-                            path_topo[hop2_path[i][1][1] - 1, hop2_path[i][1][0] - 1] - min_path_cap))
+                    path_topo[hop2_path[i][0][0], hop2_path[i][0][1]] = max(0, (
+                            path_topo[hop2_path[i][0][0], hop2_path[i][0][1]] - min_path_cap))
+                    path_topo[hop2_path[i][0][1], hop2_path[i][0][0]] = max(0, (
+                            path_topo[hop2_path[i][0][1], hop2_path[i][0][0]] - min_path_cap))
+                    path_topo[hop2_path[i][1][0], hop2_path[i][1][1]] = max(0, (
+                            path_topo[hop2_path[i][1][0], hop2_path[i][1][1]] - min_path_cap))
+                    path_topo[hop2_path[i][1][1], hop2_path[i][1][0]] = max(0, (
+                            path_topo[hop2_path[i][1][1], hop2_path[i][1][0]] - min_path_cap))
                     # 更新剩余带宽资源
                     flow_path[r] += used_path[i]
 
@@ -106,14 +111,14 @@ def distr_Traffic(init_topo_cap, inputs):
             # 元素为一个元胞数组，数组中的每个元素都为一个三元组[S,D,R]，表示这条流的源和目的 pod 与带宽分配
             # 因为网络中存在两跳转发，位于两个 pod 间的流，其源 pod 和目的 pod 可能把并不是这两个 pod
             for j in range(0, len(flow_path[r])):
-                if traffic_distr[flow_path[r][j][0] - 1, flow_path[r][j][1] - 1]:
-                    traffic_distr[flow_path[r][j][0] - 1, flow_path[r][j][1] - 1] = (
-                        traffic_distr[flow_path[r][j][0] - 1, flow_path[r][j][1] - 1], [source, destination,
-                                                                                        flow_path[r][j][2]])
-                    traffic_distr[flow_path[r][j][0] - 1, flow_path[r][j][1] - 1] = list(
-                        traffic_distr[flow_path[r][j][0] - 1, flow_path[r][j][1] - 1])
+                if traffic_distr[flow_path[r][j][0], flow_path[r][j][1]]:
+                    traffic_distr[flow_path[r][j][0], flow_path[r][j][1]] = (
+                        traffic_distr[flow_path[r][j][0], flow_path[r][j][1]], [source, destination,
+                                                                                flow_path[r][j][2]])
+                    traffic_distr[flow_path[r][j][0], flow_path[r][j][1]] = list(
+                        traffic_distr[flow_path[r][j][0], flow_path[r][j][1]])
                 else:
-                    traffic_distr[flow_path[r][j][0] - 1, flow_path[r][j][1] - 1] = (
+                    traffic_distr[flow_path[r][j][0], flow_path[r][j][1]] = (
                         [source, destination, flow_path[r][j][2]])
 
     return traffic_distr, flow_path, break_flag, unavail_flow

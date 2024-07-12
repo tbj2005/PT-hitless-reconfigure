@@ -58,7 +58,7 @@ def hitless_reconfigure(S_numpy, E_numpy, R_in, inputs, port_allocation):
                     R_in[r].route[i][6] = C + 0
                     R_in[r].route[i][7] = A + 0
 
-    R = {'sou_des': [[R_in[i].source - 1, R_in[i].destination - 1] for i in range(0, len(R_in))],
+    R = {'sou_des': [[R_in[i].source, R_in[i].destination] for i in range(0, len(R_in))],
          'route': [R_in[i].route for i in range(0, len(R_in))]}
 
     S_real_numpy = np.zeros((Omega, Omega, K, T))
@@ -164,6 +164,7 @@ def hitless_reconfigure(S_numpy, E_numpy, R_in, inputs, port_allocation):
     # 初始化 STA 数组
     STA = np.zeros((2, T), dtype=int)
     Delta = M_real_numpy - E_real_numpy  # Difference matrix
+    Delta = Delta.astype('int')
     indices = np.argwhere(Delta > 0)  # 找到待拆线
     for index in indices:
         STA[0, index[3]] += Delta[index[0], index[1], index[2], index[3]]  # 拆线

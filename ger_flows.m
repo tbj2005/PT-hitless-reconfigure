@@ -1,7 +1,7 @@
 function flow_requests = ger_flows(inputs,Logical_topo_init_cap,topo_index)
 %%假设初始的流量都是一跳可达的
 %%%%%%%随机产生流量
-    rng(topo_index);
+    % rng(topo_index);
     flow_requests  = [];
     flow_requests_num = 0;
     [sour_row,dest_col] = find(triu(Logical_topo_init_cap));

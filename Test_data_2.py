@@ -1,8 +1,9 @@
 # -*- coding:utf-8 -*-
 """
 作者：TBJ
-日期：2024年06约23日
+日期：2024年07约11日
 """
+
 import time
 
 # 用于仿真 5pod 场景下物理拓扑的计算和平滑重构的调度
@@ -16,16 +17,16 @@ import target_topo_convert
 import hitless_reconfig_v3
 
 inputs = Input_class.NetworkInformation()
-inputs.nodes_num = 5  # 网络输入参数方案见 class 内注释
-inputs.group_num = 2
-inputs.oxc_ports = 20
+inputs.nodes_num = 8  # 网络输入参数方案见 class 内注释
+inputs.group_num = 1
+inputs.oxc_ports = 24
 inputs.oxc_num_a_group = 1
-inputs.connection_cap = 1
-inputs.physical_conn_oxc = 4
+inputs.connection_cap = 100
+inputs.physical_conn_oxc = 3
 inputs.max_hop = 2
-inputs.resi_cap = 0.65
+inputs.resi_cap = 0.75
 
-inputs.request = [[2, 3, 2], [2, 4, 3]]  # 两种流量需求输入，网络流量少，可以平滑重构
+inputs.request = [[6, 7, 10]]  # 两种流量需求输入，网络流量少，可以平滑重构
 # inputs.request = [[2, 3, 3], [1, 4, 3], [2, 4, 1]]  # 网络流量较满，无法平滑重构的情况
 
 T = inputs.group_num
@@ -37,16 +38,13 @@ for m in range(2, 3):
     logical_topo = np.empty((T, K), dtype=object)
     logical_topo_cap = np.empty((T, K), dtype=object)
     # group 1 逻辑子拓扑
-    logical_topo[0, 0] = np.array([[0, 1, 2, 0, 1], [1, 0, 0, 2, 1], [2, 0, 0, 1, 0], [0, 2, 1, 0, 0], [1, 1, 0, 0, 0]])
-    # group 2 逻辑子拓扑
-    logical_topo[1, 0] = np.array([[0, 1, 2, 0, 0], [1, 0, 1, 1, 1], [2, 1, 0, 1, 0], [0, 1, 1, 0, 1], [0, 1, 0, 1, 0]])
+    logical_topo[0, 0] = np.array([[0, 1, 2, 0, 0, 0, 0, 0], [1, 0, 0, 1, 0, 0, 1, 0], [2, 0, 0, 1, 0, 0, 0, 0], [0, 1, 1, 0, 0, 1, 0, 0], [0, 0, 0, 0, 0, 1, 0, 1], [0, 0, 0, 1, 1, 0, 1, 0], [0, 1, 0, 0, 0, 1, 0, 1], [0, 0, 0, 0, 1, 0, 1, 0]])
     # 逻辑拓扑对应的带宽量
     logical_topo_cap[0, 0] = logical_topo[0, 0] * inputs.connection_cap
-    logical_topo_cap[1, 0] = logical_topo[1, 0] * inputs.connection_cap
-    Logical_topo_init_conn = logical_topo[0, 0] + logical_topo[1, 0]
-    Logical_topo_init_cap = logical_topo_cap[0, 0] + logical_topo_cap[1, 0]
+    Logical_topo_init_conn = logical_topo[0, 0]
+    Logical_topo_init_cap = logical_topo_cap[0, 0]
     # 目标逻辑拓扑
-    Logical_topo_desi = np.array([[0, 0, 3, 0, 1], [0, 0, 3, 5, 0], [3, 3, 0, 2, 0], [0, 5, 2, 0, 1], [1, 0, 0, 1, 0]])
+    Logical_topo_desi = np.array([[0, 2, 0, 1, 0, 0, 0, 0], [2, 0, 1, 0, 0, 0, 0, 0], [0, 1, 0, 2, 0, 0, 0, 0], [1, 0, 2, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 2, 1, 0], [0, 0, 0, 0, 2, 0, 1, 0], [0, 0, 0, 0, 1, 1, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0]])
     start = time.time()
     traffic_distr, flow_path, _, _ = distr_Traffic.distr_Traffic(Logical_topo_init_cap, inputs)
 
@@ -64,3 +62,4 @@ for m in range(2, 3):
     stage = hitless_reconfig_v3.hitless_reconfigure(S, E, R, inputs, port_allocation)
     end = time.time()
     print('stage:', stage, 'time:', end - start)
+

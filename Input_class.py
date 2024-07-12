@@ -21,17 +21,17 @@ class NetworkInformation:
         self.method = 0  # 物理拓扑计算方案，取值1-3
         self.request = []  # 通信需求三元组[S, D, R]
         self.cap_ratio = []
-        self.num_requests = 0
+        self.num_requests = 0  # 流量需求数目
 
 
 class StimulateInformation:
     def __init__(self):
-        self.nodes_num = []
-        self.group_num = []
-        self.oxc_ports = []
-        self.oxc_num_a_group = []
-        self.connection_cap = []
-        self.physical_conn_oxc = []
+        self.nodes_num = []  # 存储多种仿真场景下网络中 pod 数目的数组
+        self.group_num = []  # 存储 group 数目
+        self.oxc_ports = []  # 存储单 OXC 提供的 port 数目
+        self.oxc_num_a_group = []  # 存储一个 group 中的 OXC 数目
+        self.connection_cap = []  # 存储一个 OXC 连接提供的带宽容量
+        self.physical_conn_oxc = []  # 存储一个 pod 可以连接的物理链路数目
         self.max_num_requests = []
         self.cap_ratio = []
 

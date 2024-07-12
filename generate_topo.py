@@ -10,6 +10,12 @@ import numpy as np
 
 
 def gener_topo(inputs, topo_index):
+    """
+    产生随机拓扑
+    :param inputs:
+    :param topo_index:
+    :return:
+    """
     Logical_topo_init_conn = np.zeros([inputs.nodes_num, inputs.nodes_num])
     Logical_topo_init_cap = np.zeros([inputs.nodes_num, inputs.nodes_num])
     logical_topo = np.empty([inputs.group_num, inputs.oxc_num_a_group], dtype=object)
@@ -32,8 +38,8 @@ def gener_topo(inputs, topo_index):
                         else:
                             rand_i = 0
 
-                        logical_topo_1[i][j] = rand_i
-                        logical_topo_1[j][i] = rand_i
+                        logical_topo_1[i][j] = rand_i + 0
+                        logical_topo_1[j][i] = rand_i + 0
 
             logical_topo[t][k] = copy.deepcopy(logical_topo_1)
             logical_topo_cap[t][k] = logical_topo[t][k] * inputs.connection_cap
@@ -74,7 +80,7 @@ def gener_topo(inputs, topo_index):
                                      inputs.connection_cap) * inputs.cap_ratio)
             update_total_bandwidth = total_bandwidth - update_total_bandwidth
             if update_total_bandwidth > 0:
-                ava_band_1hop = Logical_topo_init_cap[source][destination]
+                ava_band_1hop = Logical_topo_init_cap[source][destination] + 0
                 col = np.where(Logical_topo_init_conn[source])
                 col = col[0]
 
@@ -83,8 +89,8 @@ def gener_topo(inputs, topo_index):
                     hop2_col1 = np.where(Logical_topo_init_conn[col[r]])[0]
                     hop2_col = np.where(hop2_col1 == destination)[0]
                     if len(hop2_col) > 0:
-                        hop1_cap = Logical_topo_init_cap[source][col[r]]
-                        hop2_cap = Logical_topo_init_cap[col[r]][destination]
+                        hop1_cap = Logical_topo_init_cap[source][col[r]] + 0
+                        hop2_cap = Logical_topo_init_cap[col[r]][destination] + 0
                         ava_cap = min(hop1_cap, hop2_cap)
                         ava_bandwidth += ava_cap
 
@@ -93,7 +99,7 @@ def gener_topo(inputs, topo_index):
                 if max_val != 0:
                     require_bandwidth_band = random.randint(1, max_val)
                     update_total_bandwidth -= require_bandwidth_band
-                    flow_requests.append([source, destination, require_bandwidth_band])
+                    flow_requests.append([source + 1, destination + 1, require_bandwidth_band])
 
     else:
         flow_requests = []

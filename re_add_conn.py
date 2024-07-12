@@ -3,6 +3,8 @@
 作者：TBJ
 日期：2024年06月26日
 """
+import copy
+
 import numpy as np
 import sub_add_conns_v2
 
@@ -20,17 +22,17 @@ def re_add_conns(inputs, logical_topo, Logical_topo_weight, update_delta_topo_ad
                                                inputs.nodes_num], dtype=object)
         for t in range(0, inputs.group_num):
             for k in range(0, inputs.oxc_num_a_group):
-                update_logical_topo_try[t][k] = update_logical_topo[t][k]
+                update_logical_topo_try[t][k] = copy.deepcopy(update_logical_topo[t][k])
                 for i in range(0, inputs.nodes_num):
                     for j in range(0, inputs.nodes_num):
                         if update_logical_topo_try[t][k][i][j] > logical_topo[t][k][i][j]:
                             new_add_link_num = update_logical_topo_try[t][k][i][j] - logical_topo[t][k][i][j]
-                            update_logical_topo_weight[t][k][i][j] = ([0 for _ in range(0, new_add_link_num)] +
+                            update_logical_topo_weight[t][k][i][j] = ([0 for _ in range(0, int(new_add_link_num))] +
                                                                       Logical_topo_weight[t][k][i][j])
                         else:
                             new_del_link_num = logical_topo[t][k][i][j] - update_logical_topo_try[t][k][i][j]
                             update_logical_topo_weight[t][k][i][j] = \
-                                [Logical_topo_weight[t][k][i][j][n] for n in range(new_del_link_num, len(
+                                [Logical_topo_weight[t][k][i][j][n] for n in range(int(new_del_link_num), len(
                                     Logical_topo_weight[t][k][i][j]))]
 
         if index == 1:

@@ -40,7 +40,7 @@ def ger_flows(inputs, Logical_topo_init_cap, topo_index):
             if max_val != 0:
                 require_bandwidth_band = random.randint(1, max_val)
                 update_total_bandwidth -= require_bandwidth_band
-                flow_requests.append([source, destination, require_bandwidth_band])
+                flow_requests.append([source + 1, destination + 1, require_bandwidth_band])
                 flow_requests_num += 1
 
     return flow_requests

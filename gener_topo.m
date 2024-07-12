@@ -4,7 +4,7 @@ function [Logical_topo_init_conn,Logical_topo_init_cap,logical_topo,logical_topo
 Logical_topo_init_conn = zeros(inputs.nodes_num,inputs.nodes_num);
 Logical_topo_init_cap = Logical_topo_init_conn;
 % rng(1);%%四节点，1 直接添加就完了
-rng(topo_index);
+% rng(topo_index);
 %% 产生根据物理连接分解的初始逻辑拓扑
 for t = 1:inputs.groupnum
     for k = 1:inputs.oxcnum_agroup

@@ -4,7 +4,6 @@
 日期：2024年06约25日
 """
 import copy
-import time
 
 import numpy as np
 import Input_class
@@ -25,11 +24,14 @@ def cost_del_conn_groom(inputs, delta_topo, Logical_topo, method):
     logical_topo = Logical_topo.logical_topo
 
     row, col = np.where(delta_topo_delete)
+    # 找到删除连接的 node 对
     del_ele = sum([logical_topo[row[k]][col[k]] for k in range(0, len(row))])
+    # 对这些 node 对的更新后逻辑拓扑连接求和
 
     free_ports = []
 
     if del_ele > 0:
+        # 如果当前更新完的拓扑可以删除至少一条待删除连接
         triu_delta_topo_add = np.triu(delta_topo_add)
         reshape_triu_delta_topo_add = np.reshape(triu_delta_topo_add, (-1,), order='F')
         sort_add_delta_topo_ind = np.argsort(reshape_triu_delta_topo_add)[::-1]
@@ -50,15 +52,28 @@ def cost_del_conn_groom(inputs, delta_topo, Logical_topo, method):
                     del_sub.append(i)
                     break
         sub_index = [sub_index[i] for i in range(0, len(sub_index)) if i not in del_sub]
+        # 为待增加矩阵的 node 对 按照其待增加连接数目按从大到小排序
+        add_links_ports = []
         for i in range(0, len(sub_index)):
-            index_i_degree1_1 = np.sum(logical_topo[sub_index[i][0]])
-            index_i_degree2_1 = np.sum(logical_topo[sub_index[i][1]])
+            add_links_ports += [sub_index[i][0], sub_index[i][1]]
+        add_links_ports = sorted(list(set(add_links_ports)))
+        for i in range(0, len(add_links_ports)):
+            index_i_degree1_1 = (
+                sum([logical_topo[add_links_ports[i]][k] for k in range(0, len(logical_topo[add_links_ports[i]]))]))
             if max_links_InNodes - index_i_degree1_1 > 0:
-                free_ports += [sub_index[i][0] for _ in range(0, int(max_links_InNodes - index_i_degree1_1))]
-            if max_links_InNodes - index_i_degree2_1 > 0:
-                free_ports += [sub_index[i][1] for _ in range(0, int(max_links_InNodes - index_i_degree2_1))]
+                free_ports += [add_links_ports[i] for _ in range(0, int(max_links_InNodes - index_i_degree1_1))]
+        # for i in range(0, len(sub_index)):
+        #     index_i_degree1_1 = np.sum(logical_topo[sub_index[i][0]])
+        #     index_i_degree2_1 = np.sum(logical_topo[sub_index[i][1]])
+        #     # 计算节点已使用端口数
+        #     if max_links_InNodes - index_i_degree1_1 > 0:
+        #         # 节点没用满，更新 free_ports 数组
+        #         free_ports += [sub_index[i][0] for _ in range(0, int(max_links_InNodes - index_i_degree1_1))]
+        #     if max_links_InNodes - index_i_degree2_1 > 0:
+        #         free_ports += [sub_index[i][1] for _ in range(0, int(max_links_InNodes - index_i_degree2_1))]
 
         after_delete_topo = logical_topo - delta_topo_delete
+        # 删掉一条连接后的逻辑拓扑
         after_delete_topo[after_delete_topo < 0] = 0
         update_delta_add_topo = copy.deepcopy(delta_topo_add)
         update_logical_topo = copy.deepcopy(after_delete_topo)
@@ -89,8 +104,9 @@ def cost_del_conn_groom(inputs, delta_topo, Logical_topo, method):
         new_add_links = np.sum(can_add_conns_InNodePair)
         for i in range(0, len(sub_index)):
             if can_add_conns_InNodePair[i] > 0:
-                value_in_AddNodePairs = np.tile([sub_index[i][0], sub_index[i][1]],
-                                                can_add_conns_InNodePair[i])
+                value_in_AddNodePairs = []
+                for k in range(0, can_add_conns_InNodePair[i]):
+                    value_in_AddNodePairs += [sub_index[i][0], sub_index[i][1]]
                 for j in range(0, 2 * can_add_conns_InNodePair[i]):
                     loc_free_ports = [k if value_in_AddNodePairs[j] == free_ports[k] else -1 for k in range(0, len(
                         free_ports))]
@@ -100,18 +116,22 @@ def cost_del_conn_groom(inputs, delta_topo, Logical_topo, method):
                     else:
                         loc_free_ports = min(loc_free_ports)
                     if loc_free_ports != -1:
-                        free_ports[loc_free_ports] = -1
+                        for loc in range(0, len(free_ports)):
+                            free_ports[loc] = -1
                     else:
-                        row_indices, col_indices = np.where(del_index[:, 0:2] == value_in_AddNodePairs[j])
+                        row_indices, col_indices \
+                            = np.where(np.array([del_index[k][0:2] for k in range(0, len(
+                                    del_index))]) == value_in_AddNodePairs[j])
                         if len(row_indices) > 0:
-                            min_row_index = np.argmin(del_index[row_indices, 2])
+                            min_row_index = (
+                                np.argmin(np.array([del_index[row_indices[k]][2] for k in range(0, len(row_indices))])))
                             del_index[row_indices[min_row_index]][col_indices[min_row_index]] = -1
 
         update_delta_delete_topo = np.zeros([inputs.nodes_num, inputs.nodes_num])
-        rows_with_zero, _ = np.where(del_index[:, 0:2] == -1)
+        rows_with_zero, _ = np.where(np.array([del_index[k][0:2] for k in range(0, len(del_index))]) == -1)
         rows_with_zero = np.unique(np.sort(rows_with_zero))
 
-        del_uv = del_index_init[rows_with_zero, 0:2]
+        del_uv = [del_index_init[rows_with_zero[k]][0:2] for k in range(0, len(rows_with_zero))]
         for i in range(0, len(rows_with_zero)):
             update_delta_delete_topo[del_uv[i][0]][del_uv[i][1]] = 1
         update_delta_delete_topo += update_delta_delete_topo.T
@@ -140,26 +160,26 @@ def cost_del_conn_groom(inputs, delta_topo, Logical_topo, method):
                                    range(0, len(real_del_sub_index1))])
                 total_cost = add_benefit - delete_cost
 
-            update_topo.update_logical_topo_cap = update_logical_topo_cap
-            update_topo.update_logical_topo = update_logical_topo
-            update_topo.update_delta_add_topo = update_delta_add_topo
-            update_topo.update_delta_delete_topo_ed = update_delta_delete_topo
+            update_topo.update_logical_topo_cap = copy.deepcopy(update_logical_topo_cap)
+            update_topo.update_logical_topo = copy.deepcopy(update_logical_topo)
+            update_topo.update_delta_add_topo = copy.deepcopy(update_delta_add_topo)
+            update_topo.update_delta_delete_topo_ed = copy.deepcopy(update_delta_delete_topo)
             update_topo.update_delta_topo_delete = delta_topo_delete - update_delta_delete_topo
         else:
             total_cost = - np.Inf
-            update_topo.update_logical_topo_cap = logical_topo_cap
-            update_topo.update_logical_topo = logical_topo
-            update_topo.update_delta_add_topo = delta_topo_add
+            update_topo.update_logical_topo_cap = copy.deepcopy(logical_topo_cap)
+            update_topo.update_logical_topo = copy.deepcopy(logical_topo)
+            update_topo.update_delta_add_topo = copy.deepcopy(delta_topo_add)
             update_topo.update_delta_delete_topo_ed = np.zeros([inputs.nodes_num, inputs.nodes_num])
-            update_topo.update_delta_topo_delete = delta_topo_delete
+            update_topo.update_delta_topo_delete = copy.deepcopy(delta_topo_delete)
             new_add_links = 0
     else:
         total_cost = - np.Inf
-        update_topo.update_logical_topo_cap = logical_topo_cap
-        update_topo.update_logical_topo = logical_topo
-        update_topo.update_delta_add_topo = delta_topo_add
+        update_topo.update_logical_topo_cap = copy.deepcopy(logical_topo_cap)
+        update_topo.update_logical_topo = copy.deepcopy(logical_topo)
+        update_topo.update_delta_add_topo = copy.deepcopy(delta_topo_add)
         update_topo.update_delta_delete_topo_ed = np.zeros([inputs.nodes_num, inputs.nodes_num])
-        update_topo.update_delta_topo_delete = delta_topo_delete
+        update_topo.update_delta_topo_delete = copy.deepcopy(delta_topo_delete)
         new_add_links = 0
 
     return total_cost, update_topo, new_add_links

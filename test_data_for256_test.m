@@ -15,7 +15,7 @@ input.cap_ratio = [0.01,0.03,0.05,0.07,0.09];
 topo_index = 1;
 
 % for i = 1:length(input.nodesnum)
-for i = 5:6
+for i = 1:1
     inputs.nodes_num = input.nodesnum(i); %% podsnum
     inputs.groupnum = input.groupnum(i); %% groupnum
     inputs.oxcports = input.oxcports(i); %% ports pair that an OXC provided
