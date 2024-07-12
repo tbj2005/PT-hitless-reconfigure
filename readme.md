@@ -25,7 +25,7 @@ numpy, networkx, math
 pip install + 库函数名
 ~~~
 
-将 matlab / python 的所有文件放进同一文件夹，在直接运行仿真文件即可
+将 matlab / python 的所有文件放进同一文件夹，直接运行仿真文件即可
 
 ### 小规模代码运行：
 
