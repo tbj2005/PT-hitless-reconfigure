@@ -27,19 +27,24 @@ def gener_topo(inputs, topo_index):
             logical_topo_1 = np.zeros([inputs.nodes_num, inputs.nodes_num])
             for i in range(0, inputs.nodes_num - 1):
                 for j in range(i + 1, inputs.nodes_num):
-                    if i != j:
+                    if i != j:  # 只遍历上三角矩阵，因为逻辑拓扑都是对称矩阵
                         sum_i = np.sum(logical_topo_1, axis=0)[i]
                         sum_j = np.sum(logical_topo_1, axis=1)[j]
+                        # 分别计算 node i 和 node j 的端口使用量
                         rest_cap1 = inputs.physical_conn_oxc - sum_i
                         rest_cap2 = inputs.physical_conn_oxc - sum_j
+                        # 计算剩余端口数
                         rest_cap = min(rest_cap1, rest_cap2)
+                        # node i 和 node j 间可以增加的最大连接数
                         if rest_cap > 0:
                             rand_i = random.randint(0, rest_cap)
+                            # 随机从 0 到 rest_cap 取值
                         else:
                             rand_i = 0
 
                         logical_topo_1[i][j] = rand_i + 0
                         logical_topo_1[j][i] = rand_i + 0
+                        # 给逻辑子拓扑 node 间连接赋值
 
             logical_topo[t][k] = copy.deepcopy(logical_topo_1)
             logical_topo_cap[t][k] = logical_topo[t][k] * inputs.connection_cap

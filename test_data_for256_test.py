@@ -16,12 +16,12 @@ import distr_Traffic
 import convert_inputs
 import physical_topo_fu
 import target_topo_convert
-import hitless_reconfig_v3
+import hitless_reconfig_v3_2
 
 Stimulate = Input_class.StimulateInformation()
 # 大规模仿真支持自定义规模，默认 6 种规模，具体元素意义见结构体注释
 Stimulate.nodes_num = [8, 16, 32, 64, 128, 256]
-Stimulate.group_num = [1, 1, 1, 1, 1, 1]
+Stimulate.group_num = [2, 1, 1, 1, 1, 1]
 Stimulate.oxc_ports = [8 * 3, 16 * 3, 32 * 3, 64 * 3, 128 * 3, 256 * 4]
 Stimulate.oxc_num_a_group = [1, 1, 1, 1, 1, 1]
 Stimulate.connection_cap = [100, 100, 100, 100, 100, 100]
@@ -49,7 +49,7 @@ for i in range(5, 6):
 
     for j in range(1, 2):
         # 需求流量数目
-        inputs.num_requests = 10
+        inputs.num_requests = 20
 
         # 随机产生初始逻辑拓扑
         Logical_topo_init_conn, Logical_topo_init_cap, logical_topo, logical_topo_cap, _ = (
@@ -70,11 +70,12 @@ for i in range(5, 6):
         # 判断流量是否可以在两跳路径内完全依靠目标逻辑拓扑转发
         _, _, breakflag1, unava_flow_tar = distr_Traffic.distr_Traffic(Logical_topo_target_cap, inputs)
 
+        """
         if breakflag1 == 1 or breakflag0 == 1:
             # 如果初始逻辑拓扑和目标逻辑拓扑任意一个无法在两跳内满足流量需求
-            cannot_serflow = []
+            cannot_serflow = []  # 存储无法服务的流
             for i_r in range(0, len(unava_flow_ini)):
-                current_row = unava_flow_ini[i_r][0:2]
+                current_row = unava_flow_ini[i_r][0:2]  # 找无法服务流的源和目的 pod
                 matching_rows = \
                     [1 if unava_flow_tar[k][0:2] == current_row else 0 for k in range(0, len(unava_flow_tar))]
                 if sum(matching_rows) > 0:
@@ -105,8 +106,18 @@ for i in range(5, 6):
 
                 # 修改 request
                 inputs.request = [inputs.request[k] for k in range(0, len(inputs.request)) if k in bandwidth_0]
+        """
+        if breakflag1 == 1:
+            # 说明目标逻辑拓扑无法在两跳内服务需求流量
+            for k in range(0, len(unava_flow_tar)):
+                for m in range(0, len(inputs.request)):
+                    if unava_flow_tar[k][0] == inputs.request[m][0] and unava_flow_tar[k][1] == inputs.request[m][1]:
+                        inputs.request[m][2] -= unava_flow_tar[k][2]
+                        break
 
-        traffic_distr, flow_path, breakflag0, unava_flow_ini = (
+        inputs.request = [inputs.request[k] for k in range(0, len(inputs.request)) if inputs.request[k][2] != 0]
+
+        traffic_distr, flow_path, _, _ = (
             distr_Traffic.distr_Traffic(Logical_topo_init_cap, inputs))
 
         RE = inputs.request
@@ -136,6 +147,6 @@ for i in range(5, 6):
                                                         port_allocation_inti_topo, inputs)
 
             # 执行平滑重构算法
-            stage = hitless_reconfig_v3.hitless_reconfigure(S, E, R, inputs, port_allocation)
+            stage = hitless_reconfig_v3_2.hitless_reconfigure(S, E, R, inputs, port_allocation)
             end = time.time()
             print('stage:', stage, 'time:', end - start)

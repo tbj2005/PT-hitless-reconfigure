@@ -16,7 +16,7 @@ matlab仿真文件和python仿真文件在同输入下输出结果可能不同�
 
 ### 库函数要求
 
-numpy, networkx, math
+numpy, networkx, math， PyMaxflow
 
 报  no module + 库函数名的错误解决方法：
 

@@ -3,7 +3,7 @@ clear
 clc
 
 input.nodesnum = [8,16,32,64,128,256];
-input.groupnum = [1,1,1,1,1,1];
+input.groupnum = [2,1,1,1,1,1];
 input.oxcports = [8*3,16*3,32*3,64*3,128*3,256*4];
 input.oxcnum_agroup = [1,1,1,1,1,1];
 input.connection_cap = [100, 100, 100,100, 100, 100];
@@ -32,7 +32,7 @@ for i = 1:1
     % for j = 1: 2^(2*i-1):input.max_num_requests(i)
     % for j = 1: 2^(i):input.max_num_requests(i)
     for j = 1
-        inputs.num_requests = j;
+        inputs.num_requests = 10;
         % disp('i j')
         % disp([i,j])
         
