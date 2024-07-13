@@ -13,7 +13,7 @@ import distr_Traffic
 import convert_inputs
 import physical_topo_fu
 import target_topo_convert
-import hitless_reconfig_v3
+import hitless_reconfig_v3_2
 
 inputs = Input_class.NetworkInformation()
 inputs.nodes_num = 5  # 网络输入参数方案见 class 内注释
@@ -26,12 +26,12 @@ inputs.max_hop = 2
 inputs.resi_cap = 0.65
 
 inputs.request = [[2, 3, 2], [2, 4, 3]]  # 两种流量需求输入，网络流量少，可以平滑重构
-inputs.request = [[2, 3, 3], [1, 4, 3], [2, 4, 1]]  # 网络流量较满，无法平滑重构的情况
+# inputs.request = [[2, 3, 3], [1, 4, 3], [2, 4, 1]]  # 网络流量较满，无法平滑重构的情况
 
 T = inputs.group_num
 K = inputs.oxc_num_a_group
 
-for m in range(1, 3):
+for m in range(2, 3):
     inputs.method = m
 
     logical_topo = np.empty((T, K), dtype=object)
@@ -61,6 +61,6 @@ for m in range(1, 3):
     E = target_topo_convert.target_topo_convert(S_Conn_cap, S, logical_topo, update_logical_topo,
                                                 port_allocation_inti_topo, inputs)
 
-    stage = hitless_reconfig_v3.hitless_reconfigure(S, E, R, inputs, port_allocation)
+    stage = hitless_reconfig_v3_2.hitless_reconfigure(S, E, R, inputs, port_allocation)
     end = time.time()
-    print('stage:', stage, 'time:', end - start)
+    # print('stage:', stage, 'time:', end - start)

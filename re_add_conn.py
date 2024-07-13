@@ -11,7 +11,16 @@ import sub_add_conns_v2
 
 def re_add_conns(inputs, logical_topo, Logical_topo_weight, update_delta_topo_add, update_logical_topo,
                  update_delta_topo_delete):
-
+    """
+    用来执行打断重连过程
+    :param inputs:
+    :param logical_topo:
+    :param Logical_topo_weight:
+    :param update_delta_topo_add:
+    :param update_logical_topo:
+    :param update_delta_topo_delete:
+    :return:
+    """
     index = 1
     del_update_logical_topo = np.empty([inputs.group_num, inputs.oxc_num_a_group], dtype=object)
     use_ind = []

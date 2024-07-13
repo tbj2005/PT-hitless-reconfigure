@@ -198,19 +198,25 @@ def physical_topo_fu(inputs, delta_topology, logical_topo_traffic, logical_topo,
                     # 更新连接后的连接矩阵
                     total_benefit[t][k], update_topo[t][k], new_add_links[t][k] = (
                         cost_delconn_groom.cost_del_conn_groom(inputs, delta_topo, Logical_topo, method))
+                    # 计算 metric 和每个子拓扑的重构方案
 
         b_check = 0
         if np.sum(new_add_links) == 0:
+            # 如果每个子拓扑都不能再通过删除待删除连接以增加待增加连接了，但仍然还存在待增加连接，此时进入打断重连
             add_value = np.Inf
             update_logical_topo_min = np.zeros([inputs.nodes_num, inputs.nodes_num])
             while np.sum(update_delta_topo_add) > 0:
+                # 循环打乱重连，直到所有待增加连接全部增加
                 b_check += 1
                 if add_value > np.sum(update_delta_topo_add):
                     add_value = np.sum(update_delta_topo_add) + 0
                     update_logical_topo_min = copy.deepcopy(update_logical_topo)
+                    # 找到增加连接最大的重连方案，并输出更新后逻辑拓扑
                 if b_check == max_check:
+                    # 到达最大重连次数，放弃打断重连并输出
                     update_check_flag = 1
                     return update_logical_topo_min, update_check_flag
+                print(b_check)
                 update_delta_topo_add, update_logical_topo, update_delta_topo_delete = (
                     re_add_conn.re_add_conns(inputs, logical_topo, Logical_topo_weight, update_delta_topo_add,
                                              update_logical_topo, update_delta_topo_delete))

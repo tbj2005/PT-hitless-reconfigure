@@ -21,7 +21,7 @@ import hitless_reconfig_v3_2
 Stimulate = Input_class.StimulateInformation()
 # 大规模仿真支持自定义规模，默认 6 种规模，具体元素意义见结构体注释
 Stimulate.nodes_num = [8, 16, 32, 64, 128, 256]
-Stimulate.group_num = [2, 1, 1, 1, 1, 1]
+Stimulate.group_num = [2, 2, 2, 2, 2, 2]
 Stimulate.oxc_ports = [8 * 3, 16 * 3, 32 * 3, 64 * 3, 128 * 3, 256 * 4]
 Stimulate.oxc_num_a_group = [1, 1, 1, 1, 1, 1]
 Stimulate.connection_cap = [100, 100, 100, 100, 100, 100]
@@ -33,7 +33,7 @@ Stimulate.physical_conn_oxc = [int(Stimulate.oxc_ports[i] / Stimulate.nodes_num[
 
 topo_index = 1
 
-for i in range(5, 6):
+for i in range(4, 5):
     # 每次循环跑一种规模，每次循环的输入从数组中取得
     inputs = Input_class.NetworkInformation()
     inputs.nodes_num = Stimulate.nodes_num[i]
@@ -49,7 +49,7 @@ for i in range(5, 6):
 
     for j in range(1, 2):
         # 需求流量数目
-        inputs.num_requests = 20
+        inputs.num_requests = 30
 
         # 随机产生初始逻辑拓扑
         Logical_topo_init_conn, Logical_topo_init_cap, logical_topo, logical_topo_cap, _ = (
