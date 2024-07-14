@@ -138,11 +138,13 @@ def physical_topo_fu(inputs, delta_topology, logical_topo_traffic, logical_topo,
                                 [res_traffic] +
                                 [inputs.connection_cap * (i + 1) for i in range(0, int(w_required_LinkNum_floor))])
                         # 更新此时的 weight 为[0 * 未使用的连接， 带宽余数， i * 用满连接]
+            """
             for u in range(0, inputs.nodes_num):
                 for v in range(0, inputs.nodes_num):
                     if len(Logical_topo_weight[t][k][u][v]) == 0:
                         # 初始逻辑拓扑为0，将 weight 此时的值置为 [0]
                         Logical_topo_weight[t][k][u][v] = [0]
+            """
             update_delta_topo_delete_tk[t][k] = np.zeros([inputs.nodes_num, inputs.nodes_num])
             deleted_links_all[t][k] = np.zeros([inputs.nodes_num, inputs.nodes_num])
             # 存放已删除连接
@@ -217,6 +219,14 @@ def physical_topo_fu(inputs, delta_topology, logical_topo_traffic, logical_topo,
                     update_check_flag = 1
                     return update_logical_topo_min, update_check_flag
                 print(b_check)
+                update_logical_topo[1][0][0][1] = 1
+                update_logical_topo[1][0][1][0] = 1
+                update_logical_topo[1][0][1][4] = 0
+                update_logical_topo[1][0][4][1] = 0
+                update_delta_topo_delete[0][1] = 1
+                update_delta_topo_delete[1][0] = 1
+                update_delta_topo_delete[1][4] = 0
+                update_delta_topo_delete[4][1] = 0
                 update_delta_topo_add, update_logical_topo, update_delta_topo_delete = (
                     re_add_conn.re_add_conns(inputs, logical_topo, Logical_topo_weight, update_delta_topo_add,
                                              update_logical_topo, update_delta_topo_delete))

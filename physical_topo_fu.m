@@ -84,7 +84,7 @@ for t = 1:inputs.groupnum
                 end
             end
         end
-        Logical_topo_weight{t,k}(cellfun("isempty",Logical_topo_weight{t,k})== 1) = {0};%可有可无？不影响
+        % Logical_topo_weight{t,k}(cellfun("isempty",Logical_topo_weight{t,k})== 1) = {0};%可有可无？不影响
         update_delta_topo_deled_tk{t,k} = zeros(inputs.nodes_num,inputs.nodes_num);
         deleted_links_all{t,k} = zeros(inputs.nodes_num,inputs.nodes_num);
     end
