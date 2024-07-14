@@ -94,7 +94,8 @@ def sub_add_conns_v2(inputs, update_logical_topo_weight, update_logical_topo, up
                         add_connections2_check[del_links_topo_ind][1]] = 0
 
             del_links_topo_row, del_links_topo_col = np.where(del_update_logical_topo1)
-            del_links_topo = [[del_links_topo_row[x], del_links_topo_col[x]] for x in range(0, len(del_links_topo_row))]
+            del_links_topo = \
+                [np.array([del_links_topo_row[x], del_links_topo_col[x]]) for x in range(0, len(del_links_topo_row))]
 
             free_ports_before_del1 = copy.deepcopy(free_ports_before_del)
             # 表示每个端口的空闲数量
