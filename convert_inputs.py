@@ -105,7 +105,7 @@ def convert_inputs(inputs, flow_path, logical_topo):
         R[r].demands = request[r][2]
         R[r].route = []
         p = 1
-        flow_cap_rest[r] = request[r][2]
+        flow_cap_rest[r] = request[r][2] + 0
         # for n in range(0, len(flow_path[r])):
         while flow_cap_rest[r] > 0:
             row_des = [k for k in range(0, len(flow_path[r])) if flow_path[r][k][1] == R[r].destination]
@@ -189,12 +189,13 @@ def convert_inputs(inputs, flow_path, logical_topo):
                                         for k in range(0, len(loc2)):
                                             S_Conn_cap[loc2[k]][6] = ava_ports[1][k][6]
 
-                                        if ava_ports[0][ij][6] <= 0:
-                                            break
-
                                         if flow_cap_r[jj] <= 0:
                                             flag = 1
                                             break
+
+                                        if ava_ports[0][ij][6] <= 0:
+                                            break
+
                     else:
                         for ij in range(0, ava_ports_num[0]):
                             if ava_ports[0][ij][6] > 0:
@@ -218,10 +219,12 @@ def convert_inputs(inputs, flow_path, logical_topo):
                                         len(ava_ports[0])) for k in range(0, len(S_Conn_cap))]
                                 loc = [k for k in loc if k != -1]
                                 loc1 = [k for k in loc1 if k != -1]
-                                for k in range(0, len(loc1)):
-                                    S_Conn_cap[loc1[k]][6] = ava_ports[0][k][6]
-                                for k in range(0, len(loc)):
-                                    S_Conn_cap[loc[k]][6] = ava_ports[0][k][6]
+                                if len(loc1) > 0:
+                                    for k in range(0, len(loc1)):
+                                        S_Conn_cap[loc1[k]][6] = ava_ports[0][k][6] + 0
+                                if len(loc) > 0:
+                                    for k in range(0, len(loc)):
+                                        S_Conn_cap[loc[k]][6] = ava_ports[0][k][6] + 0
                                 if flow_cap_r[jj] == 0:
                                     break
 

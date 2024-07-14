@@ -102,7 +102,6 @@ for r = 1:req_num
         path_hop = {};
         flow_cap_r = [];
         for jj = 1:length(row_des)%标志r有length(row_des)条路径
-           
             path_hop{jj}= flowpath{1,r}(start:row_des(jj),:);%某条路径的连接，用到的capcity
             start = row_des(jj) + 1;
             flow_cap_r(jj) = path_hop{jj}(1,3);%在第jj条路径上的流r占用的bandwidth
