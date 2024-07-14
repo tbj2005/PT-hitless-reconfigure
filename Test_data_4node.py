@@ -31,7 +31,7 @@ inputs.request = [[2, 3, 2], [1, 4, 2]]  # 两种流量需求输入，网络流�
 T = inputs.group_num
 K = inputs.oxc_num_a_group
 
-for m in range(1, 3):
+for m in range(2, 3):
     inputs.method = m
 
     logical_topo = np.empty((T, K), dtype=object)

@@ -38,7 +38,7 @@ def physical_topo_fu(inputs, delta_topology, logical_topo_traffic, logical_topo,
             sub_index_col = sub_index_col.astype(int)
             sub_index_row = sort_add_delta_topo_ind % inputs.nodes_num
             row0, col0 = np.where(triu_update_delta_topo_add == 0)
-            # 按增加连接数从大到小为 node 对排序
+            # 按增加连接数从大到小为 node 对排序,在这里，排序与 matlab 不同，但都是正确的
             sub_index = []
             for i in range(0, len(sub_index_row)):
                 if reshape_triu_update_delta_topo_add[sort_add_delta_topo_ind[i]] > 0:
@@ -219,14 +219,6 @@ def physical_topo_fu(inputs, delta_topology, logical_topo_traffic, logical_topo,
                     update_check_flag = 1
                     return update_logical_topo_min, update_check_flag
                 print(b_check)
-                # update_logical_topo[1][0][0][1] = 1
-                # update_logical_topo[1][0][1][0] = 1
-                # update_logical_topo[1][0][1][4] = 0
-                # update_logical_topo[1][0][4][1] = 0
-                # update_delta_topo_delete[0][1] = 1
-                # update_delta_topo_delete[1][0] = 1
-                # update_delta_topo_delete[1][4] = 0
-                # update_delta_topo_delete[4][1] = 0
                 update_delta_topo_add, update_logical_topo, update_delta_topo_delete = (
                     re_add_conn.re_add_conns(inputs, logical_topo, Logical_topo_weight, update_delta_topo_add,
                                              update_logical_topo, update_delta_topo_delete))

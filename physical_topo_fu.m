@@ -175,7 +175,7 @@ while any(update_delta_topo_add,"all")
         %% 如果每个平面不能新增链接，但是还需要新增链接
         while ~all(update_delta_topo_add(:) == 0)
             b_check = b_check + 1;
-
+            b_check
             %%%%NOTE：相当于整个循环出不来
             % [update_delta_topo_add,update_logical_topo,update_delta_topo_dele] = add_conns(inputs,logical_topo,Logical_topo_weight,update_delta_topo_add, update_logical_topo,update_delta_topo_dele);
             [update_delta_topo_add,update_logical_topo,update_delta_topo_dele] = re_add_conns(inputs,logical_topo,Logical_topo_weight,update_delta_topo_add, update_logical_topo, update_delta_topo_dele);

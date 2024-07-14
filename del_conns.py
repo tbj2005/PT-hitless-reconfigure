@@ -24,10 +24,10 @@ def del_conns(inputs, add_links_tk_topo, update_logical_topo, del_update_logical
 
     del_links_real = []
 
-    if del_ports:
+    if len(del_ports) > 0:
         if_in = np.zeros(len(del_links_topo))
         for che_ind in range(0, len(del_links_topo)):
-            lia = [x for x in del_links_topo[che_ind] if x in del_ports]
+            lia = [1 for x in del_links_topo[che_ind] if x in del_ports]
             if_in[che_ind] = sum(lia)
 
         sort_ind = np.argsort(if_in)

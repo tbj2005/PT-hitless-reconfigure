@@ -174,7 +174,7 @@ def sub_add_conns_v2(inputs, update_logical_topo_weight, update_logical_topo, up
     if len(sub_AddLinks_change) > 0:
         add_links_tk_topo = [add_connections[mark_row][mark_col][k][0:2] for k in
                              range(0, len(add_connections[mark_row][mark_col]))]
-        if add_links_tk_topo:
+        if len(add_links_tk_topo) > 0:
             del_links_tk_topo = del_conns.del_conns(inputs, add_links_tk_topo, update_logical_topo[mark_row][mark_col],
                                                     del_update_logical_topo_all[mark_row][mark_col])
             update_logical_topo[mark_row][mark_col] += (del_update_logical_topo_all[mark_row][mark_col] -
