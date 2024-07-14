@@ -661,6 +661,8 @@ def hitless_reconfigure(S_numpy, E_numpy, R_in, inputs, port_allocation):
                             Delta[k, l, j, item] += 1
                             new_flag = 1
                             eta_den += 1
+                            print('Group[', item, ']OXC[', j, ']Pod[', k, ']and Pod[', l, '], Add 1 Links')
+                            # 增加连接的输出打印
                             if seq is not None:
                                 nested_array = np.array(Distri_pod['connections'][seq])  # transform to numpy array
                                 inseq = np.where((nested_array == [item, j]).all(axis=1))[0]
