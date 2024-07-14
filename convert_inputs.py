@@ -13,7 +13,7 @@ import Input_class
 
 def convert_inputs(inputs, flow_path, logical_topo):
     """
-
+    输入转化
     :param inputs: 网络参数
     :param flow_path: 流量路径
     :param logical_topo: 逻辑拓扑
@@ -97,118 +97,132 @@ def convert_inputs(inputs, flow_path, logical_topo):
     S_Conn_cap = [S_Conn[k] + [1 * B] for k in range(0, len(S_Conn))]
     # 在 S_Conn_cap 的每一个元素内加一个数，表示可用带宽容量
     R = []  # 需求结构体
+    flow_cap_rest = np.zeros(req_num)
     for r in range(0, req_num):
         R.append(Input_class.Request())
         R[r].source = request[r][0] - 1
         R[r].destination = request[r][1] - 1
         R[r].demands = request[r][2]
         R[r].route = []
-        for n in range(0, len(flow_path[r])):
+        p = 1
+        flow_cap_rest[r] = request[r][2]
+        # for n in range(0, len(flow_path[r])):
+        while flow_cap_rest[r] > 0:
             row_des = [k for k in range(0, len(flow_path[r])) if flow_path[r][k][1] == R[r].destination]
             # row_des 表征哪些行代表着一条流的最后一跳，因为网络中有一跳和两跳两种路由方案
             start = 0
             path_hop = []  # flow_path中并不是每一行都代表从源 pod 到目的 pod 间的路由方案，还有两跳的流量，这个数组用来分路由方案将路径分开
             flow_cap_r = []  # 和上条注释一样，用来存储不同方案的带宽分配
+            route_cap_rest = []
             for jj in range(0, len(row_des)):  # 遍历所有一跳或两跳路由方案
                 path_hop.append(flow_path[r][start:row_des[jj] + 1])  # 将 flow_path 矩阵中的每一条流分开
                 start += row_des[jj] + 1
                 flow_cap_r.append(path_hop[jj][0][2])  # 储存每条一跳或两跳流量的带宽分配
                 ava_ports = []
                 ava_ports_num = []  # 存储可以用于传输该路由方案每一跳的连接数目
-                for ii in range(0, len(path_hop[jj])):  # 循环一次或两次，对应流为一跳或两跳
-                    Lialoc = [1 if S_Conn_cap[k][0:2] == [path_hop[jj][ii][n] for n in range(0, 2)]
-                              else 0 for k in range(0, len(S_Conn))]
-                    # 匹配 pod 连接情况与这一跳的路由方案
-                    ava_ports_num.append(sum(Lialoc))
-                    ava_rows = np.where(Lialoc)
-                    ava_rows = ava_rows[0]  # 可用于传输该跳的连接位置
-                    ava_port = [S_Conn_cap[ava_rows[k]][0:7] for k in range(0, len(ava_rows))]
-                    # 这些连接对应的信息
-                    A = [ava_port[k][6] for k in range(0, len(ava_port))]
-                    sorted_ind = [i[0] for i in sorted(enumerate(A), key=lambda x: x[1])]  # 对这些连接的端口容量排序
-                    ava_ports.append([ava_port[k][0:7] for k in sorted_ind])  # 放置这个路由方案可使用连接的信息
+                route_cap_rest.append(path_hop[jj][0][2])
+                while route_cap_rest[jj] > 0:
+                    for ii in range(0, len(path_hop[jj])):  # 循环一次或两次，对应流为一跳或两跳
+                        Lialoc = [1 if S_Conn_cap[k][0:2] == [path_hop[jj][ii][n] for n in range(0, 2)]
+                                  else 0 for k in range(0, len(S_Conn))]
+                        # 匹配 pod 连接情况与这一跳的路由方案
+                        ava_ports_num.append(sum(Lialoc))
+                        ava_rows = np.where(Lialoc)
+                        ava_rows = ava_rows[0]  # 可用于传输该跳的连接位置
+                        ava_port = [S_Conn_cap[ava_rows[k]][0:7] for k in range(0, len(ava_rows))]
+                        # 这些连接对应的信息
+                        A = [ava_port[k][6] for k in range(0, len(ava_port))]
+                        sorted_ind = [i[0] for i in sorted(enumerate(A), key=lambda x: x[1])]  # 对这些连接的端口容量排序
+                        ava_ports.append([ava_port[k][0:7] for k in sorted_ind])  # 放置这个路由方案可使用连接的信息
 
-                if len(path_hop[jj]) > 1:  # 路径为两跳
-                    flag = 0
-                    for ij in range(0, ava_ports_num[0]):
-                        if flag == 1:  # 需求流量 r 被处理完
-                            break
-                        if ava_ports[0][ij][6] > 0:
-                            for ji in range(0, ava_ports_num[1]):
-                                if ava_ports[1][ji][6] > 0:
-                                    flow_val = min(ava_ports[0][ij][6], ava_ports[1][ji][6], flow_cap_r[jj])
-                                    R[r].route.extend([ava_ports[0][ij][2:6] + ava_ports[1][ji][2:6] + [flow_val]])
-
-                                    t = ava_ports[0][ij][2]
-                                    k = ava_ports[0][ij][3]
-                                    sub_path = path_hop[jj][0][0:2]
-                                    logical_topo_traffic[t][k][sub_path[0]][sub_path[1]] += flow_val
-
-                                    t1 = ava_ports[1][ji][2]
-                                    k1 = ava_ports[1][ji][3]
-                                    logical_topo_traffic[t1][k1][path_hop[jj][1][0]][path_hop[jj][1][1]] += (
-                                        flow_val)
-
-                                    ava_ports[0][ij][6] -= flow_val
-                                    ava_ports[1][ji][6] -= flow_val
-
-                                    flow_cap_r[jj] -= flow_val
-
-                                    loc = [k if ava_ports[0][n][2:6] == S_Conn_cap[k][2:6] else -1
-                                           for n in range(0, len(ava_ports[0])) for k in range(0, len(S_Conn_cap))]
-                                    loc1 = [k if [ava_ports[0][n][2], ava_ports[0][n][3], ava_ports[0][n][5],
-                                            ava_ports[0][n][4]] == S_Conn_cap[k][2:6] else -1 for n in range(0,
-                                            len(ava_ports[0])) for k in range(0, len(S_Conn_cap))]
-                                    loc = [k for k in loc if k != -1]
-                                    loc1 = [k for k in loc1 if k != -1]
-                                    for k in range(0, len(loc1)):
-                                        S_Conn_cap[loc1[k]][6] = ava_ports[0][k][6]
-                                    for k in range(0, len(loc)):
-                                        S_Conn_cap[loc[k]][6] = ava_ports[0][k][6]
-
-                                    loc2 = [k if ava_ports[1][n][2:6] == S_Conn_cap[k][2:6] else -1
-                                            for n in range(0, len(ava_ports[1])) for k in range(0, len(S_Conn_cap))]
-                                    loc1_2 = [k if [ava_ports[1][n][2], ava_ports[1][n][3], ava_ports[1][n][5],
-                                              ava_ports[1][n][4]] == S_Conn_cap[k][2:6] else -1 for n in range(0,
-                                              len(ava_ports[1])) for k in range(0, len(S_Conn_cap))]
-                                    loc2 = [k for k in loc2 if k != -1]
-                                    loc1_2 = [k for k in loc1_2 if k != -1]
-                                    for k in range(0, len(loc1_2)):
-                                        S_Conn_cap[loc1_2[k]][6] = ava_ports[1][k][6]
-                                    for k in range(0, len(loc2)):
-                                        S_Conn_cap[loc2[k]][6] = ava_ports[1][k][6]
-
-                                    if ava_ports[0][ij][6] <= 0:
-                                        break
-
-                                    if flow_cap_r[jj] <= 0:
-                                        flag = 1
-                                        break
-                else:
-                    for ij in range(0, ava_ports_num[0]):
-                        if ava_ports[0][ij][6] > 0:
-                            flow_value = min(ava_ports[0][ij][6], flow_cap_r[jj])
-                            R[r].route.extend([ava_ports[0][ij][2:6] + [flow_value]])
-
-                            t = ava_ports[0][ij][2]
-                            k = ava_ports[0][ij][3]
-                            logical_topo_traffic[t][k][path_hop[0][0][0]][path_hop[0][0][1]] += flow_value
-
-                            flow_cap_r[jj] -= flow_value
-                            ava_ports[0][ij][6] -= flow_value
-
-                            loc = [k if ava_ports[0][n][2:6] == S_Conn_cap[k][2:6] else -1
-                                   for n in range(0, len(ava_ports[0])) for k in range(0, len(S_Conn_cap))]
-                            loc1 = [k if [ava_ports[0][n][2], ava_ports[0][n][3], ava_ports[0][n][5],
-                                    ava_ports[0][n][4]] == S_Conn_cap[k][2:6] else -1 for n in range(0,
-                                    len(ava_ports[0])) for k in range(0, len(S_Conn_cap))]
-                            loc = [k for k in loc if k != -1]
-                            loc1 = [k for k in loc1 if k != -1]
-                            for k in range(0, len(loc1)):
-                                S_Conn_cap[loc1[k]][6] = ava_ports[0][k][6]
-                            for k in range(0, len(loc)):
-                                S_Conn_cap[loc[k]][6] = ava_ports[0][k][6]
-                            if flow_cap_r[jj] == 0:
+                    if len(path_hop[jj]) > 1:  # 路径为两跳
+                        flag = 0
+                        for ij in range(0, ava_ports_num[0]):
+                            if flag == 1:  # 需求流量 r 被处理完
                                 break
+                            if ava_ports[0][ij][6] > 0:
+                                for ji in range(0, ava_ports_num[1]):
+                                    if ava_ports[1][ji][6] > 0:
+                                        flow_val = min(ava_ports[0][ij][6], ava_ports[1][ji][6], flow_cap_r[jj])
+                                        R[r].route.extend([ava_ports[0][ij][2:6] + ava_ports[1][ji][2:6] + [flow_val]])
+                                        flow_cap_rest[r] -= flow_val
+                                        route_cap_rest[jj] -= flow_val
+
+                                        t = ava_ports[0][ij][2]
+                                        k = ava_ports[0][ij][3]
+                                        sub_path = path_hop[jj][0][0:2]
+                                        logical_topo_traffic[t][k][sub_path[0]][sub_path[1]] += flow_val
+
+                                        t1 = ava_ports[1][ji][2]
+                                        k1 = ava_ports[1][ji][3]
+                                        logical_topo_traffic[t1][k1][path_hop[jj][1][0]][path_hop[jj][1][1]] += (
+                                            flow_val)
+
+                                        ava_ports[0][ij][6] -= flow_val
+                                        ava_ports[1][ji][6] -= flow_val
+
+                                        flow_cap_r[jj] -= flow_val
+
+                                        p += 1
+
+                                        loc = [k if ava_ports[0][n][2:6] == S_Conn_cap[k][2:6] else -1
+                                               for n in range(0, len(ava_ports[0])) for k in range(0, len(S_Conn_cap))]
+                                        loc1 = [k if [ava_ports[0][n][2], ava_ports[0][n][3], ava_ports[0][n][5],
+                                                ava_ports[0][n][4]] == S_Conn_cap[k][2:6] else -1 for n in range(0,
+                                                len(ava_ports[0])) for k in range(0, len(S_Conn_cap))]
+                                        loc = [k for k in loc if k != -1]
+                                        loc1 = [k for k in loc1 if k != -1]
+                                        for k in range(0, len(loc1)):
+                                            S_Conn_cap[loc1[k]][6] = ava_ports[0][k][6]
+                                        for k in range(0, len(loc)):
+                                            S_Conn_cap[loc[k]][6] = ava_ports[0][k][6]
+
+                                        loc2 = [k if ava_ports[1][n][2:6] == S_Conn_cap[k][2:6] else -1
+                                                for n in range(0, len(ava_ports[1])) for k in range(0, len(S_Conn_cap))]
+                                        loc1_2 = [k if [ava_ports[1][n][2], ava_ports[1][n][3], ava_ports[1][n][5],
+                                                  ava_ports[1][n][4]] == S_Conn_cap[k][2:6] else -1 for n in range(0,
+                                                  len(ava_ports[1])) for k in range(0, len(S_Conn_cap))]
+                                        loc2 = [k for k in loc2 if k != -1]
+                                        loc1_2 = [k for k in loc1_2 if k != -1]
+                                        for k in range(0, len(loc1_2)):
+                                            S_Conn_cap[loc1_2[k]][6] = ava_ports[1][k][6]
+                                        for k in range(0, len(loc2)):
+                                            S_Conn_cap[loc2[k]][6] = ava_ports[1][k][6]
+
+                                        if ava_ports[0][ij][6] <= 0:
+                                            break
+
+                                        if flow_cap_r[jj] <= 0:
+                                            flag = 1
+                                            break
+                    else:
+                        for ij in range(0, ava_ports_num[0]):
+                            if ava_ports[0][ij][6] > 0:
+                                flow_value = min(ava_ports[0][ij][6], flow_cap_r[jj])
+                                R[r].route.extend([ava_ports[0][ij][2:6] + [flow_value]])
+                                flow_cap_rest[r] -= flow_value
+                                route_cap_rest[jj] -= flow_value
+
+                                t = ava_ports[0][ij][2]
+                                k = ava_ports[0][ij][3]
+                                logical_topo_traffic[t][k][path_hop[0][0][0]][path_hop[0][0][1]] += flow_value
+
+                                flow_cap_r[jj] -= flow_value
+                                ava_ports[0][ij][6] -= flow_value
+                                p += 1
+
+                                loc = [k if ava_ports[0][n][2:6] == S_Conn_cap[k][2:6] else -1
+                                       for n in range(0, len(ava_ports[0])) for k in range(0, len(S_Conn_cap))]
+                                loc1 = [k if [ava_ports[0][n][2], ava_ports[0][n][3], ava_ports[0][n][5],
+                                        ava_ports[0][n][4]] == S_Conn_cap[k][2:6] else -1 for n in range(0,
+                                        len(ava_ports[0])) for k in range(0, len(S_Conn_cap))]
+                                loc = [k for k in loc if k != -1]
+                                loc1 = [k for k in loc1 if k != -1]
+                                for k in range(0, len(loc1)):
+                                    S_Conn_cap[loc1[k]][6] = ava_ports[0][k][6]
+                                for k in range(0, len(loc)):
+                                    S_Conn_cap[loc[k]][6] = ava_ports[0][k][6]
+                                if flow_cap_r[jj] == 0:
+                                    break
 
     return S, R, logical_topo_traffic, S_Conn_cap, port_allocation_inti_topo, port_allocation

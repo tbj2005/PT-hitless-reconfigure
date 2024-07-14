@@ -14,7 +14,6 @@ remain = rem(sum_port, Omega);%取余
 %pod和oxc之间的物理连接数目G_u^k,t
 G = ones(Omega, K, T);%初始化三维数组，赋值
 G = G.*ave;
-
 if remain ~= 0%有余数时执行
     for i = 1 : size(G, 3)%有几个平面
         for j = 1 : size(G, 2)%每个平面有几个oxc
@@ -94,14 +93,20 @@ for r = 1:req_num
     R(r).destination = request(r,2);
     R(r).demands = request(r,3);
     p = 1;% 更新 
-    for l = 1:size(flowpath{1,r},1) %%两个阶段有重合的地方
+    % for l = 1:size(flowpath{1,r},1) %%两个阶段有重合的地方
+    flow_cap_rest(r) = request(r,3);
+    while flow_cap_rest(r) > 0
+        disp("check");
         [row_des,~] = find(flowpath{1,r}(:,2) == R(r).destination);%找出一条路径结束的标志
         start = 1;
         path_hop = {};
+        flow_cap_r = [];
         for jj = 1:length(row_des)%标志r有length(row_des)条路径
+           
             path_hop{jj}= flowpath{1,r}(start:row_des(jj),:);%某条路径的连接，用到的capcity
             start = row_des(jj) + 1;
             flow_cap_r(jj) = path_hop{jj}(1,3);%在第jj条路径上的流r占用的bandwidth
+
             % if ~isempty(ava_ports)
             %     [lia,loc] = ismember(ava_ports(:,3:6),S_Conn_cap(:,3:6),'rows');%双向端口上的容量都要更新
             %     [lia1,loc1] = ismember([ava_ports(:,3:4),ava_ports(:,6),ava_ports(:,5)],S_Conn_cap(:,3:6),'rows');
@@ -113,100 +118,111 @@ for r = 1:req_num
             % end
             ava_ports = {};
             ava_ports_num = [];
-            for ii = 1:size(path_hop{jj},1)
-                Lialoc = ismember(S_Conn_cap(:,1:2),path_hop{jj}(ii,1:2),'rows');%(u,v)对应的端口和平面的行数
-                ava_ports_num(ii) = sum(Lialoc(:));%满足该链接的端口数
-                [ava_rows,~] = find(Lialoc);
-                ava_port = S_Conn_cap(ava_rows,1:7);%对应的端口和OXC平面  %后边整体更新S_conn_cap
-                [Xsorted,sortedind] = sort(ava_port(:,7));%对端口的剩余容量排序
-                ava_ports{ii} = ava_port(sortedind,1:7);
-            end
-            if size(path_hop{jj},1) > 1 %路径有两跳，需要分配，从端口数多的,即平均流量少的开始计算
-                flag = 0;
-                for ij = 1:ava_ports_num(1) 
-                    if flag == 1 %% 该flowpath上的流已经处理完
-                        break;
-                    end
-                    if ava_ports{1}(ij,7) > 0 
-                        for ji = 1:ava_ports_num(2) %% 随便从两跳中的哪一跳开始都行，但是要对S_Conn_cap进行更新和排序
-                            if ava_ports{2}(ji,7) > 0
-                                flow_val = min([ava_ports{1}(ij,7),ava_ports{2}(ji,7),flow_cap_r(jj)]);
-                                R(r).route{1,p} = [ava_ports{1}(ij,3:6),ava_ports{2}(ji,3:6),flow_val];
-                                
-                                t = ava_ports{1}(ij,3);
-                                k = ava_ports{1}(ij,4);
-                                sub_path = path_hop{jj}(1,1:2);
-                                logical_topo_traffic{t,k}(sub_path(1),sub_path(2)) = logical_topo_traffic{t,k}(sub_path(1),sub_path(2)) + flow_val;
-                                % logical_topo_traffic{t,k}(path_hop{1}(2),path_hop{1}(1))
-                                % =
-                                % logical_topo_traffic{t,k}(path_hop{1}(2),path_hop{1}(1))
-                                % + flow_val; %%3.22
-
-                                t1 = ava_ports{2}(ji,3);
-                                k1 = ava_ports{2}(ji,4);
-                                logical_topo_traffic{t1,k1}(path_hop{jj}(2,1),path_hop{jj}(2,2)) = logical_topo_traffic{t1,k1}(path_hop{jj}(2,1),path_hop{jj}(2,2)) + flow_val;
-                                % 3.22 logical_topo_traffic{t1,k1}(path_hop{2}(2),path_hop{2}(1)) = logical_topo_traffic{t1,k1}(path_hop{2}(2),path_hop{2}(1)) + flow_val;
-
-                                % 更新对应端口的剩余流量
-                                ava_ports{1}(ij,7) = ava_ports{1}(ij,7) - flow_val;
-                                ava_ports{2}(ji,7) = ava_ports{2}(ji,7) - flow_val;
-                                flow_cap_r(jj) = flow_cap_r(jj) - flow_val;
-                                p = p+1;
-                                % 更新S_Conn_cap
-                                [lia,loc] = ismember(ava_ports{1}(:,3:6),S_Conn_cap(:,3:6),'rows');%双向端口上的容量都要更新
-                                [lia1,loc1] = ismember([ava_ports{1}(:,3:4),ava_ports{1}(:,6),ava_ports{1}(:,5)],S_Conn_cap(:,3:6),'rows');
-                                ava_ind = find(loc);
-                                ava_ind1 = find(loc1);
-                                loc(loc==0)=[];
-                                loc1(loc1==0)=[];
-                                S_Conn_cap(loc1,7) = ava_ports{1}(ava_ind1,7);
-                                S_Conn_cap(loc,7) = ava_ports{1}(ava_ind,7);
-
-                                [lia2,loc2] = ismember(ava_ports{2}(:,3:6),S_Conn_cap(:,3:6),'rows');%双向端口上的容量都要更新
-                                [lia1_2,loc1_2] = ismember([ava_ports{2}(:,3:4),ava_ports{2}(:,6),ava_ports{2}(:,5)],S_Conn_cap(:,3:6),'rows');
-                                ava_ind2 = find(loc2);
-                                ava_ind1_2 = find(loc1_2);
-                                loc2(loc2==0)=[];
-                                loc1_2(loc1_2==0)=[];
-                                S_Conn_cap(loc1_2,7) = ava_ports{2}(ava_ind1_2,7);
-                                S_Conn_cap(loc2,7) = ava_ports{2}(ava_ind2,7);
-
-                                if ava_ports{1}(ij,7) <= 0
-                                    break;
-                                end
-
-                                if flow_cap_r(jj) <= 0
-                                    flag = 1;
-                                    break;
+            route_cap_rest(jj) = path_hop{jj}(1,3);
+            while route_cap_rest(jj) > 0
+               
+                for ii = 1:size(path_hop{jj},1)
+                    Lialoc = ismember(S_Conn_cap(:,1:2),path_hop{jj}(ii,1:2),'rows');%(u,v)对应的端口和平面的行数
+                    ava_ports_num(ii) = sum(Lialoc(:));%满足该链接的端口数
+                    [ava_rows,~] = find(Lialoc);
+                    ava_port = S_Conn_cap(ava_rows,1:7);%对应的端口和OXC平面  %后边整体更新S_conn_cap
+                    [Xsorted,sortedind] = sort(ava_port(:,7));%对端口的剩余容量排序
+                    ava_ports{ii} = ava_port(sortedind,1:7);
+                end        
+                if size(path_hop{jj},1) > 1 %路径有两跳，需要分配，从端口数多的,即平均流量少的开始计算
+                    flag = 0;
+                    for ij = 1:ava_ports_num(1) 
+                        if flag == 1 %% 该flowpath上的流已经处理完
+                            break;
+                        end
+                        if ava_ports{1}(ij,7) > 0 
+                            for ji = 1:ava_ports_num(2) %% 随便从两跳中的哪一跳开始都行，但是要对S_Conn_cap进行更新和排序
+                                disp("check");
+                                if ava_ports{2}(ji,7) > 0
+                                    flow_val = min([ava_ports{1}(ij,7),ava_ports{2}(ji,7),flow_cap_r(jj)]);
+                                    
+                                    R(r).route{1,p} = [ava_ports{1}(ij,3:6),ava_ports{2}(ji,3:6),flow_val];
+                                    flow_cap_rest(r) = flow_cap_rest(r) - flow_val;
+                                    route_cap_rest(jj) = route_cap_rest(jj) - flow_val;
+    
+                                    t = ava_ports{1}(ij,3);
+                                    k = ava_ports{1}(ij,4);
+                                    sub_path = path_hop{jj}(1,1:2);
+                                    logical_topo_traffic{t,k}(sub_path(1),sub_path(2)) = logical_topo_traffic{t,k}(sub_path(1),sub_path(2)) + flow_val;
+                                    % logical_topo_traffic{t,k}(path_hop{1}(2),path_hop{1}(1))
+                                    % =
+                                    % logical_topo_traffic{t,k}(path_hop{1}(2),path_hop{1}(1))
+                                    % + flow_val; %%3.22
+    
+                                    t1 = ava_ports{2}(ji,3);
+                                    k1 = ava_ports{2}(ji,4);
+                                    logical_topo_traffic{t1,k1}(path_hop{jj}(2,1),path_hop{jj}(2,2)) = logical_topo_traffic{t1,k1}(path_hop{jj}(2,1),path_hop{jj}(2,2)) + flow_val;
+                                    % 3.22 logical_topo_traffic{t1,k1}(path_hop{2}(2),path_hop{2}(1)) = logical_topo_traffic{t1,k1}(path_hop{2}(2),path_hop{2}(1)) + flow_val;
+    
+                                    % 更新对应端口的剩余流量
+                                    ava_ports{1}(ij,7) = ava_ports{1}(ij,7) - flow_val;
+                                    ava_ports{2}(ji,7) = ava_ports{2}(ji,7) - flow_val;
+                                    flow_cap_r(jj) = flow_cap_r(jj) - flow_val;
+                                    p = p+1;
+                                    % 更新S_Conn_cap
+                                    [lia,loc] = ismember(ava_ports{1}(:,3:6),S_Conn_cap(:,3:6),'rows');%双向端口上的容量都要更新
+                                    [lia1,loc1] = ismember([ava_ports{1}(:,3:4),ava_ports{1}(:,6),ava_ports{1}(:,5)],S_Conn_cap(:,3:6),'rows');
+                                    ava_ind = find(loc);
+                                    ava_ind1 = find(loc1);
+                                    loc(loc==0)=[];
+                                    loc1(loc1==0)=[];
+                                    S_Conn_cap(loc1,7) = ava_ports{1}(ava_ind1,7);
+                                    S_Conn_cap(loc,7) = ava_ports{1}(ava_ind,7);
+    
+                                    [lia2,loc2] = ismember(ava_ports{2}(:,3:6),S_Conn_cap(:,3:6),'rows');%双向端口上的容量都要更新
+                                    [lia1_2,loc1_2] = ismember([ava_ports{2}(:,3:4),ava_ports{2}(:,6),ava_ports{2}(:,5)],S_Conn_cap(:,3:6),'rows');
+                                    ava_ind2 = find(loc2);
+                                    ava_ind1_2 = find(loc1_2);
+                                    loc2(loc2==0)=[];
+                                    loc1_2(loc1_2==0)=[];
+                                    S_Conn_cap(loc1_2,7) = ava_ports{2}(ava_ind1_2,7);
+                                    S_Conn_cap(loc2,7) = ava_ports{2}(ava_ind2,7);
+    
+                                     if flow_cap_r(jj) <= 0
+                                        flag = 1;
+                                        break;
+                                    end
+    
+                                    if ava_ports{1}(ij,7) <= 0
+                                        break;
+                                    end
+    
                                 end
                             end
                         end
                     end
-                end
-            else
-                %单跳路径
-                for ij =  1:ava_ports_num
-                    if ava_ports{1}(ij,7) > 0
-                        flow_value = min(ava_ports{1}(ij,7),flow_cap_r(jj));
-                        R(r).route{1,p} = [ava_ports{1}(ij,3:6),flow_value];
-
-                        t = ava_ports{1}(ij,3);
-                        k = ava_ports{1}(ij,4);
-                        logical_topo_traffic{t,k}(path_hop{1}(1),path_hop{1}(2)) = logical_topo_traffic{t,k}(path_hop{1}(1),path_hop{1}(2)) + flow_value;
-
-                        flow_cap_r(jj) = flow_cap_r(jj) - flow_value;
-                        ava_ports{1}(ij,7) = ava_ports{1}(ij,7) - flow_value;
-                        p = p+1;
-                        [lia,loc] = ismember(ava_ports{1}(:,3:6),S_Conn_cap(:,3:6),'rows');%双向端口上的容量都要更新
-                        [lia1,loc1] = ismember([ava_ports{1}(:,3:4),ava_ports{1}(:,6),ava_ports{1}(:,5)],S_Conn_cap(:,3:6),'rows');
-                        ava_ind = find(loc);
-                        ava_ind1 = find(loc1);
-                        loc(loc==0)=[];
-                        loc1(loc1==0)=[];
-                        S_Conn_cap(loc1,7) = ava_ports{1}(ava_ind1,7);
-                        S_Conn_cap(loc,7) = ava_ports{1}(ava_ind,7);
-                        if flow_cap_r(jj) == 0
-                            break;
+                else
+                    %单跳路径
+                    for ij =  1:ava_ports_num
+                        if ava_ports{1}(ij,7) > 0
+                            flow_value = min(ava_ports{1}(ij,7),flow_cap_r(jj));
+                            R(r).route{1,p} = [ava_ports{1}(ij,3:6),flow_value];
+                            flow_cap_rest(r) = flow_cap_rest(r) - flow_value;
+                            route_cap_rest(jj) = route_cap_rest(jj) - flow_value;
+    
+                            t = ava_ports{1}(ij,3);
+                            k = ava_ports{1}(ij,4);
+                            logical_topo_traffic{t,k}(path_hop{1}(1),path_hop{1}(2)) = logical_topo_traffic{t,k}(path_hop{1}(1),path_hop{1}(2)) + flow_value;
+    
+                            flow_cap_r(jj) = flow_cap_r(jj) - flow_value;
+                            ava_ports{1}(ij,7) = ava_ports{1}(ij,7) - flow_value;
+                            p = p+1;
+                            [lia,loc] = ismember(ava_ports{1}(:,3:6),S_Conn_cap(:,3:6),'rows');%双向端口上的容量都要更新
+                            [lia1,loc1] = ismember([ava_ports{1}(:,3:4),ava_ports{1}(:,6),ava_ports{1}(:,5)],S_Conn_cap(:,3:6),'rows');
+                            ava_ind = find(loc);
+                            ava_ind1 = find(loc1);
+                            loc(loc==0)=[];
+                            loc1(loc1==0)=[];
+                            S_Conn_cap(loc1,7) = ava_ports{1}(ava_ind1,7);
+                            S_Conn_cap(loc,7) = ava_ports{1}(ava_ind,7);
+                            if flow_cap_r(jj) == 0
+                                break;
+                            end
                         end
                     end
                 end

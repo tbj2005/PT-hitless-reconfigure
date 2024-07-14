@@ -25,8 +25,8 @@ inputs.physical_conn_oxc = 4
 inputs.max_hop = 2
 inputs.resi_cap = 0.65
 
-# inputs.request = [[2, 3, 2], [2, 4, 3]]  # 两种流量需求输入，网络流量少，可以平滑重构
-inputs.request = [[2, 3, 3], [1, 4, 3], [2, 4, 1]]  # 网络流量较满，无法平滑重构的情况
+inputs.request = [[2, 3, 2], [2, 4, 3]]  # 两种流量需求输入，网络流量少，可以平滑重构
+# inputs.request = [[2, 3, 3], [1, 4, 3], [2, 4, 1]]  # 网络流量较满，无法平滑重构的情况
 
 T = inputs.group_num
 K = inputs.oxc_num_a_group
