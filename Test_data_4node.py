@@ -48,9 +48,9 @@ for m in range(2, 3):
     # logical_topo[1, 0] = np.array([[0, 2, 0, 0],[2, 0, 0, 1],[0, 0, 0, 1],[0, 1, 1, 0]])
     # ## 测试例子 3
     # group 1 逻辑子拓扑
-    logical_topo[0, 0] = np.array([[0, 1, 1, 1],[1, 0, 1, 1],[1, 1, 0 ,0],[1, 1, 0, 0]])
+    logical_topo[0, 0] = np.array([[0, 1, 1, 1], [1, 0, 1, 1], [1, 1, 0, 0], [1, 1, 0, 0]])
     # group 2 逻辑子拓扑
-    logical_topo[1, 0] = np.array([[0, 1, 0, 0],[1, 0, 0, 1],[0, 0, 0, 0],[0, 1, 0, 0]])
+    logical_topo[1, 0] = np.array([[0, 1, 0, 0], [1, 0, 0, 1], [0, 0, 0, 0], [0, 1, 0, 0]])
     ##
 
     # 逻辑拓扑对应的带宽量
@@ -59,7 +59,7 @@ for m in range(2, 3):
     Logical_topo_init_conn = logical_topo[0, 0] + logical_topo[1, 0]
     Logical_topo_init_cap = logical_topo_cap[0, 0] + logical_topo_cap[1, 0]
     # 目标逻辑拓扑
-    Logical_topo_desi = np.array([[0, 1, 2, 2],[1, 0, 2, 3], [2, 3, 0, 1],[2, 3, 1, 0]])
+    Logical_topo_desi = np.array([[0, 1, 2, 2], [1, 0, 2, 3], [2, 2, 0, 1], [2, 3, 1, 0]])
     start = time.time()
     traffic_distr, flow_path, _, _ = distr_Traffic.distr_Traffic(Logical_topo_init_cap, inputs)
 
