@@ -12,6 +12,17 @@ import max_flow
 
 def sub_add_conns_v2(inputs, update_logical_topo_weight, update_logical_topo, update_delta_topo_del,
                      links_tobe_add_topo, used_ind, del_update_logical_topo_all):
+    """
+    打断重连子函数
+    :param inputs:
+    :param update_logical_topo_weight:
+    :param update_logical_topo:
+    :param update_delta_topo_del:
+    :param links_tobe_add_topo:
+    :param used_ind:
+    :param del_update_logical_topo_all:
+    :return:
+    """
     mf = np.zeros([inputs.group_num, inputs.oxc_num_a_group])
     add_connections = np.empty([inputs.group_num, inputs.oxc_num_a_group], dtype=object)
     del_links_real = np.empty([inputs.group_num, inputs.oxc_num_a_group], dtype=object)
@@ -24,8 +35,10 @@ def sub_add_conns_v2(inputs, update_logical_topo_weight, update_logical_topo, up
             for i in range(0, inputs.nodes_num):
                 for j in range(0, inputs.nodes_num):
                     if len(update_logical_topo_weight[t][k][i][j]) == 0:
+                        # 若更新后 weight 长度为 0 ，也就是说根本没有连接，将 node 对间的权重设为 0
                         logical_topo_weight[i][j] = 0
                     else:
+                        # 若更新后 weight 长度不为 0，令 node 对间的连接为最小权重连接，即第一条连接权重
                         logical_topo_weight[i][j] = update_logical_topo_weight[t][k][i][j][0]
 
             update_logical_topo_kt = copy.deepcopy(update_logical_topo[t][k])
@@ -34,30 +47,39 @@ def sub_add_conns_v2(inputs, update_logical_topo_weight, update_logical_topo, up
             free_ports_before_del = np.zeros(len(rest_del_update_logical_topo))
             for i_ind in range(0, len(rest_del_update_logical_topo)):
                 max_match_num[i_ind] = inputs.physical_conn_oxc - np.sum(rest_del_update_logical_topo[i_ind, :])
+                # 计算每个 node 的最大匹配数目
                 free_ports_before_del[i_ind] = inputs.physical_conn_oxc - np.sum(update_logical_topo_kt[i_ind, :])
+                # 计算每个 node 删除链接前可用的端口数目
 
             already_matched_nodes = []
             match_node = []
             for node_ind in range(0, inputs.nodes_num):
                 already_matched_nodes = [node_ind] + already_matched_nodes
-                match_cols = np.where(links_tobe_add_topo[node_ind, :])
+                match_cols = np.where(links_tobe_add_topo[node_ind])
                 match_cols = match_cols[0]
+                # 找到与各 node 相关的删除后待增加的连接
                 match_cols = [x for x in match_cols if x not in already_matched_nodes]
+                # 删掉之前的循环已经考虑过的连接
                 match_cols = sorted(match_cols)
-                match_node.append([[match_cols[i], links_tobe_add_topo[node_ind, match_cols[i]]] for i in
+                match_node.append([[match_cols[i], links_tobe_add_topo[node_ind][match_cols[i]]] for i in
                                    range(0, len(match_cols))])
+                # 将每个 node 相关未考虑删除后待增加连接和删除连接数目储存起来，每个 node 有一个数组，数组中每个元素都是二维数组，
+                # 第一个元素存放未考虑删除后待增加连接的另一个 node ,第二个元素存放这两个 node 间删除后待增加连接的数目
 
+            # 使用最大流算法
             mf[t][k], add_connections[t][k] = max_flow.max_flow(inputs, match_node, max_match_num)
 
             if mf[t][k] != 0:
                 mf[t][k], add_connections[t][k] = (
                     select_links.select_links(inputs, add_connections[t][k], links_tobe_add_topo, max_match_num))
 
-            del_update_logical_topo = del_update_logical_topo_all[t][k]
+            del_update_logical_topo = copy.deepcopy(del_update_logical_topo_all[t][k])
             add_connections1_check = [add_connections[t][k][n][0:2] for n in range(0, len(add_connections[t][k]))]
             add_connections2_check = [[add_connections[t][k][n][1], add_connections[t][k][n][0]] for n in
                                       range(0, len(add_connections[t][k]))]
+            # 保存待增加两种方向的连接
             rows_del, col_del = np.where(del_update_logical_topo)
+            # 找到子拓扑删除连接相关的 node 对
             add_connections1 = [x for x in add_connections1_check if x not in [[rows_del[i], col_del[i]] for i in
                                                                                range(0, len(rows_del))]]
             del_update_logical_topo1 = np.triu(del_update_logical_topo)
@@ -76,6 +98,7 @@ def sub_add_conns_v2(inputs, update_logical_topo_weight, update_logical_topo, up
                               range(0, len(del_links_topo_row))]
 
             free_ports_before_del1 = copy.deepcopy(free_ports_before_del)
+            # 表示每个端口的空闲数量
             for add_conn_ind in range(0, len(add_connections1)):
                 if free_ports_before_del1[add_connections1[add_conn_ind][0]] > 0:
                     free_ports_before_del1[add_connections1[add_conn_ind][0]] -= 1
@@ -86,6 +109,7 @@ def sub_add_conns_v2(inputs, update_logical_topo_weight, update_logical_topo, up
 
             if sum([sum(x) for x in add_connections1]) > 0:
                 del_port_row, del_port_col = np.where(add_connections1)
+                # 全空会报错
             else:
                 del_port_row = []
                 del_port_col = []
@@ -94,7 +118,7 @@ def sub_add_conns_v2(inputs, update_logical_topo_weight, update_logical_topo, up
             if len(del_ports) > 0:
                 if_in = np.zeros(len(del_links_topo))
                 for che_ind in range(0, len(del_links_topo)):
-                    lia = [x for x in del_links_topo[che_ind] if x not in del_ports]
+                    lia = [1 if x in del_ports else 0 for x in del_links_topo[che_ind]]
                     if_in[che_ind] = sum(lia)
 
                 sert_ind = np.argsort(if_in)

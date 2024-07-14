@@ -65,14 +65,20 @@ def re_add_conns(inputs, logical_topo, Logical_topo_weight, update_delta_topo_ad
                         links_tobe_add_topo[del_topo_row[i]][del_topo_col[i]] += 1
                         # 为这些有至少一条连接的 node 对删一条连接，以腾出端口，放入待增加拓扑中
                         del_update_logical_topo[t][k][del_topo_row[i]][del_topo_col[i]] = 1
+                        # 保存该步骤删除的拓扑
                     del_update_logical_topo[t][k] = del_update_logical_topo[t][k].astype(int)
                     update_logical_topo[t][k] -= del_update_logical_topo[t][k]
                     # 更新当前逻辑拓扑，减去子拓扑中刚刚断开的连接
 
             links_tobe_add_topo -= update_delta_topo_delete
+            # 有的连接本来就要被删除，这时候就不需要在相应 node 对拆除连接后加入待增加连接
             links_tobe_add_topo[links_tobe_add_topo < 0] = 0
-
+            # 如果上个步骤拆除的连接数比本应拆除的连接数少，那就不用删了
             links_tobe_add_topo += update_delta_topo_add
+            # 有的连接本来就要增加，加进上个步骤增加的待增加连接
+            # del_update_logical_topo 确实是被删除了，不仅是因为 links_tobe_add_topo 删除后待增加的连接，
+            # 还有本来要删除的连接，这部分连接就被删除了
+            # 如果本来需要拆除的连接数目大于上个步骤拆除的连接，此时只拆除上个步骤拆除的连接数目
 
             links_tobe_add_topo, update_logical_topo, update_delta_topo_delete, use_ind = (
                 sub_add_conns_v2.sub_add_conns_v2(inputs, update_logical_topo_weight, update_logical_topo,

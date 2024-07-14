@@ -11,9 +11,11 @@ def beyond_nodes(inputs, sort_idx, max_match_num, asy_mm_links):
     node_i_rows_asy = np.empty(inputs.nodes_num, dtype=object)
     beyond_node_degree = np.empty(inputs.nodes_num, dtype=object)
     for node_i in range(0, inputs.nodes_num):
-        node_i_rows_asy_1 = np.where([asy_mm_links[k][0] for k in range(0, len(asy_mm_links))] == sort_idx[node_i])
+        node_i_rows_asy_1 = (
+            np.where(np.array([asy_mm_links[k][0] for k in range(0, len(asy_mm_links))]) == sort_idx[node_i]))
         node_i_rows_asy_1 = node_i_rows_asy_1[0]
-        node_i_rows_asy_2 = np.where([asy_mm_links[k][1] for k in range(0, len(asy_mm_links))] == sort_idx[node_i])
+        node_i_rows_asy_2 = (
+            np.where(np.array([asy_mm_links[k][1] for k in range(0, len(asy_mm_links))]) == sort_idx[node_i]))
         node_i_rows_asy_2 = node_i_rows_asy_2[0]
         node_i_rows_asy[node_i] = np.concatenate((node_i_rows_asy_1, node_i_rows_asy_2))
         beyond_node_degree[node_i] = len(node_i_rows_asy[node_i]) - max_match_num[sort_idx[node_i]]
