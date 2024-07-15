@@ -60,8 +60,6 @@ def hitless_reconfigure(S_numpy, E_numpy, R_in, inputs, port_allocation):
 
     R = {'sou_des': [[R_in[i].source, R_in[i].destination] for i in range(0, len(R_in))],
          'route': [R_in[i].route for i in range(0, len(R_in))]}
-    print('Initial state of R:')
-    print(R)  # 打印初始流量情况
 
     S_real_numpy = np.zeros((Omega, Omega, K, T))
 
@@ -163,6 +161,9 @@ def hitless_reconfigure(S_numpy, E_numpy, R_in, inputs, port_allocation):
                 R['route'][i][j][6] = R['route'][i][j][6] // G
                 R['route'][i][j][7] = R['route'][i][j][7] // G
 
+    print('Initial state of R:', R, '\n')  # 打印初始流量情况
+    print('************************************************************************************************************************************')  # 分隔符
+
     # 初始化 STA 数组
     STA = np.zeros((2, T), dtype=int)
     Delta = M_real_numpy - E_real_numpy  # Difference matrix
@@ -211,8 +212,7 @@ def hitless_reconfigure(S_numpy, E_numpy, R_in, inputs, port_allocation):
                         for j in range(-Delta[index[0], index[1], index[2], i]):
                             Distri_pod['occupy'][-1][0]['Band_occupy'].append(0)
                             Distri_pod['occupy'][-1][0]['Req'].append([])
-                    print('Group[', i, ']OXC[', index[2], ']Pod[', index[0], ']and Pod[', index[1], '], Add',
-                          - Delta[index[0], index[1], index[2], i], 'Links')  # 增加连接的输出打印
+                    print('Group[', i, ']OXC[', index[2], ']Pod[', index[0], ']and Pod[', index[1], '], Add', - Delta[index[0], index[1], index[2], i], 'Links') # 增加连接的输出打印
                     Delta[index[0], index[1], index[2], i] = 0
                 else:
                     stages = -1
@@ -243,7 +243,7 @@ def hitless_reconfigure(S_numpy, E_numpy, R_in, inputs, port_allocation):
             # 记录上一个阶段拓扑中的连接数
             for item in remove:  # 确定当前要重构的平面
                 new_flag = 0  # 标识当前平面是否真的能拆线/增线
-                new_flag_2 = 0  # 标识当前阶段是否有流量路由变动
+                new_flag_2 = 0 # 标识当前阶段是否有流量路由变动
                 eta_basic = eta_den
                 indices = np.argwhere(Delta[..., item] > 0)  # 拆线
                 for index in indices:  # 找到要拆除的连接(s)
@@ -271,11 +271,10 @@ def hitless_reconfigure(S_numpy, E_numpy, R_in, inputs, port_allocation):
                                 STA[0, item] -= 1
                                 new_flag = 1
                                 eta_den -= 1
-                                print('Group[', item, ']OXC[', index[2], ']Pod[', index[0], ']and Pod[', index[1],
-                                      '], Remove 1 Link')  # 拆除连接的输出打印
+                                print('Group[', item, ']OXC[', index[2], ']Pod[', index[0], ']and Pod[', index[1], '], Remove 1 Link' ) # 拆除连接的输出打印
                             else:
                                 # Divert traffic to its alternative link(s)
-                                new_flag_2 = 1  # modify
+                                new_flag_2 = 1 # modify
                                 Alter_list = [[], [], []]  # group, oxc, item in Distri['occupy'], residual bandwith
                                 total_band_kl = 0  # total available bandwidth between pod k and pod l
                                 # Record the traffic on the connection to be removed
@@ -377,8 +376,7 @@ def hitless_reconfigure(S_numpy, E_numpy, R_in, inputs, port_allocation):
                                                     nested_array_1 = np.array(
                                                         copy_Distri['connections'][seq_1])  # transform to numpy array
                                                     inseq_1 = \
-                                                        np.where((nested_array_1 == [judge[0], judge[1]]).all(axis=1))[
-                                                            0]
+                                                        np.where((nested_array_1 == [judge[0], judge[1]]).all(axis=1))[0]
                                                     for b in range(len(
                                                             copy_Distri['occupy'][seq_1][inseq_1[0]]['Band_occupy'])):
                                                         for c in range(len(
@@ -511,8 +509,6 @@ def hitless_reconfigure(S_numpy, E_numpy, R_in, inputs, port_allocation):
 
                                                     if Logical_res[pod_fir, pod_sec] != 0 and Logical_res[
                                                         pod_thi, pod_fou] != 0:
-                                                        # ava_capa = min(Logical_res[pod_fir, pod_sec], Logical_res[
-                                                        # pod_thi, pod_fou])
                                                         seq_1 = find_list_in_dict(copy_Distri, [pod_fir, pod_sec],
                                                                                   'pod_pairs')
                                                         seq_2 = find_list_in_dict(copy_Distri, [pod_thi, pod_fou],
@@ -639,9 +635,8 @@ def hitless_reconfigure(S_numpy, E_numpy, R_in, inputs, port_allocation):
                     if eta < eta_th:  # End of current stage
                         break
 
-                if new_flag_2 == 1:  # 标识有流量变动
-                    print('Current R:')
-                    print(R)  # 打印当前流量情况
+                if new_flag_2 == 1: # 标识有流量变动
+                    print('Current R:', R)  # 打印当前流量情况
 
                 # 增线
                 indices = np.argwhere(Delta[..., item] < 0)
@@ -661,8 +656,7 @@ def hitless_reconfigure(S_numpy, E_numpy, R_in, inputs, port_allocation):
                             Delta[k, l, j, item] += 1
                             new_flag = 1
                             eta_den += 1
-                            print('Group[', item, ']OXC[', j, ']Pod[', k, ']and Pod[', l, '], Add 1 Links')
-                            # 增加连接的输出打印
+                            print('Group[', item, ']OXC[', j, ']Pod[', k, ']and Pod[', l, '], Add 1 Links') # 增加连接的输出打印
                             if seq is not None:
                                 nested_array = np.array(Distri_pod['connections'][seq])  # transform to numpy array
                                 inseq = np.where((nested_array == [item, j]).all(axis=1))[0]
@@ -683,6 +677,7 @@ def hitless_reconfigure(S_numpy, E_numpy, R_in, inputs, port_allocation):
                 if new_flag == 1:  # 标识当前平面的连线有变动
                     stages += 1
                     print('Current Stage = ', stages, 'Completed\n')  # 打印当前阶段数，当前阶段已完成
+                    print('************************************************************************************************************************************') # 阶段分隔符
                     break
 
             if new_flag == 0:  # 表明每个平面都不能变动，平滑重构失败

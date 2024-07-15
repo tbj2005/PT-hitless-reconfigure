@@ -33,7 +33,7 @@ Stimulate.physical_conn_oxc = [int(Stimulate.oxc_ports[i] / Stimulate.nodes_num[
 
 topo_index = 1
 
-for i in range(4, 5):
+for i in range(3, 4):
     # 每次循环跑一种规模，每次循环的输入从数组中取得
     inputs = Input_class.NetworkInformation()
     inputs.nodes_num = Stimulate.nodes_num[i]

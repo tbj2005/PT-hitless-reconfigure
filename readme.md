@@ -16,7 +16,7 @@ matlab仿真文件和python仿真文件在同输入下输出结果可能不同�
 
 ### 库函数要求
 
-numpy, networkx, math， PyMaxflow
+numpy, networkx， PyMaxflow
 
 报  no module + 库函数名的错误解决方法：
 
@@ -43,10 +43,12 @@ time：算法运行时间
 
 stage：平滑重构阶段数
 
+平滑重构各阶段动作
+
 ### 大规模代码运行：
 Input：随机生成
 
-Output:time、 stage
+Output:time、 stage、平滑重构各阶段动作
 
 ## 文件说明
 

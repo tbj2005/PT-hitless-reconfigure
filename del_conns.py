@@ -43,7 +43,7 @@ def del_conns(inputs, add_links_tk_topo, update_logical_topo, del_update_logical
         del_real_row = sorted(list(set(del_real_row)))
         del_links_real = np.array([del_links_topo[del_real_row[i]] for i in range(0, len(del_real_row))])
 
-        if len(del_links_real) == 0:
-            del_links_real = np.zeros([inputs.nodes_num, inputs.nodes_num])
+    if len(del_links_real) == 0:
+        del_links_real = np.zeros([inputs.nodes_num, inputs.nodes_num])
 
     return del_links_real
