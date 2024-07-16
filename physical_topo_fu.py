@@ -213,9 +213,7 @@ def physical_topo_fu(inputs, delta_topology, logical_topo_traffic, logical_topo,
                 if add_value > np.sum(update_delta_topo_add):
                     add_value = np.sum(update_delta_topo_add) + 0
                     update_logical_topo_min = copy.deepcopy(update_logical_topo)
-                    # 找到增加连接最大的重连方案，并输出更新后逻辑拓扑
                 if b_check == max_check:
-                    # 到达最大重连次数，放弃打断重连并输出
                     update_check_flag = 1
                     return update_logical_topo_min, update_check_flag
                 print(b_check)
