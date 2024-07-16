@@ -216,7 +216,6 @@ def physical_topo_fu(inputs, delta_topology, logical_topo_traffic, logical_topo,
                 if b_check == max_check:
                     update_check_flag = 1
                     return update_logical_topo_min, update_check_flag
-                print(b_check)
                 update_delta_topo_add, update_logical_topo, update_delta_topo_delete = (
                     re_add_conn.re_add_conns(inputs, logical_topo, Logical_topo_weight, update_delta_topo_add,
                                              update_logical_topo, update_delta_topo_delete))
