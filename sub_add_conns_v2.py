@@ -127,19 +127,26 @@ def sub_add_conns_v2(inputs, update_logical_topo_weight, update_logical_topo, up
                 del_links_topo1 = copy.deepcopy(del_links_topo_sorted)
 
                 for del_ind in range(0, len(del_ports)):
-                    row_ports_del, col_ports_del = np.where(del_links_topo_sorted == del_ports[del_ind])
-                    if len(row_ports_del) > 0:
-                        del_links_topo1[row_ports_del[0]][col_ports_del[0]] = 0
+                    if len(del_links_topo_sorted) > 0:
+                        row_ports_del, col_ports_del = np.where(del_links_topo_sorted == del_ports[del_ind])
+                        if len(row_ports_del) > 0:
+                            del_links_topo1[row_ports_del[0]][col_ports_del[0]] = 0
 
-                del_real_row, _ = np.where(del_links_topo1 == 0)
-                del_real_row = sorted(list(set(del_real_row)))
-                del_links_real[t][k] = np.array([del_links_topo[del_real_row[x]] for x in range(0, len(del_real_row))])
-                add_del_num[t][k] = len(del_links_real)
+                if len(del_links_topo1) > 0:
+                    del_real_row, _ = np.where(del_links_topo1 == 0)
+                    del_real_row = sorted(list(set(del_real_row)))
+                    del_links_real[t][k] = (
+                        np.array([del_links_topo[del_real_row[x]] for x in range(0, len(del_real_row))]))
+                    add_del_num[t][k] = len(del_links_real)
+                else:
+                    del_links_real[t][k] = []
+                    add_del_num[t][k] = 0
 
-                for del_real_ind in range(0, len(del_links_real[t][k])):
-                    if update_delta_topo_del[del_links_real[t][k][del_real_ind][0]][del_links_real[t][k][
-                            del_real_ind][1]] > 0:
-                        add_del_num[t][k] -= 1
+                if del_links_real[t][k] is not None:
+                    for del_real_ind in range(0, len(del_links_real[t][k])):
+                        if update_delta_topo_del[del_links_real[t][k][del_real_ind][0]][del_links_real[t][k][
+                                del_real_ind][1]] > 0:
+                            add_del_num[t][k] -= 1
 
                 add_del_traffic[t][k] = sum([logical_topo_weight[del_links_real[t][k][n][0]][del_links_real[t][k][n][1]]
                                              for n in range(0, len(del_links_real[t][k]))])
@@ -162,11 +169,13 @@ def sub_add_conns_v2(inputs, update_logical_topo_weight, update_logical_topo, up
 
     if len(used_ind) > 0:
         for i in range(0, len(used_ind)):
-            benefit[used_ind[i]] = -np.Inf
+            used_ind_row = int(used_ind[i] / inputs.oxc_num_a_group)
+            used_ind_col = int(used_ind[i] % inputs.oxc_num_a_group)
+            benefit[used_ind_row][used_ind_col] = -np.Inf
 
     mark_ind = np.argmax(benefit)
-    mark_row = int(mark_ind % inputs.nodes_num)
-    mark_col = int(mark_ind / inputs.nodes_num)
+    mark_row = int(mark_ind / inputs.oxc_num_a_group)
+    mark_col = int(mark_ind % inputs.oxc_num_a_group)
 
     used_ind.append(mark_ind)
     rest_add_delta_topo = np.zeros([inputs.nodes_num, inputs.nodes_num])

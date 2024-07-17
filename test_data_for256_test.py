@@ -22,8 +22,8 @@ Stimulate = Input_class.StimulateInformation()
 # 大规模仿真支持自定义规模，默认 6 种规模，具体元素意义见结构体注释
 Stimulate.nodes_num = [8, 16, 32, 64, 128, 256]
 Stimulate.group_num = [2, 2, 2, 2, 2, 2]
-Stimulate.oxc_ports = [8 * 3, 16 * 3, 32 * 3, 64 * 3, 128 * 3, 256 * 2]
-Stimulate.oxc_num_a_group = [1, 1, 1, 1, 1, 1]
+Stimulate.oxc_ports = [8 * 3, 16 * 3, 32 * 3, 64 * 3, 128 * 3, 256]
+Stimulate.oxc_num_a_group = [3, 1, 1, 1, 1, 2]
 Stimulate.connection_cap = [1, 1, 1, 1, 1, 1]
 Stimulate.physical_conn_oxc = [int(Stimulate.oxc_ports[i] / Stimulate.nodes_num[i]) for i in
                                range(0, len(Stimulate.nodes_num))]
@@ -33,7 +33,7 @@ Stimulate.physical_conn_oxc = [int(Stimulate.oxc_ports[i] / Stimulate.nodes_num[
 
 topo_index = 1
 
-for i in range(3, 4):
+for i in range(5, 6):
     # 每次循环跑一种规模，每次循环的输入从数组中取得
     inputs = Input_class.NetworkInformation()
     inputs.nodes_num = Stimulate.nodes_num[i]
@@ -137,7 +137,7 @@ for i in range(3, 4):
             # 计算目标物理拓扑
             update_logical_topo, update_check_flag = (
                 physical_topo_fu.physical_topo_fu(inputs, delta_topology, logical_topo_traffic, logical_topo,
-                                                  logical_topo_cap, 100))
+                                                  logical_topo_cap, 30))
 
             if update_check_flag == 1:
                 update_logical_topo = copy.deepcopy(logical_topo_desi)

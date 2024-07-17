@@ -56,7 +56,7 @@ for m in range(1, 3):
     delta_topology = Logical_topo_desi - Logical_topo_init_conn
 
     update_logical_topo, _ = physical_topo_fu.physical_topo_fu(inputs, delta_topology, logical_topo_traffic,
-                                                               logical_topo, logical_topo_cap, 100)
+                                                               logical_topo, logical_topo_cap, 50)
 
     E = target_topo_convert.target_topo_convert(S_Conn_cap, S, logical_topo, update_logical_topo,
                                                 port_allocation_inti_topo, inputs)
