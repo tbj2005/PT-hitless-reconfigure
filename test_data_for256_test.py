@@ -23,7 +23,7 @@ Stimulate = Input_class.StimulateInformation()
 Stimulate.nodes_num = [8, 16, 32, 64, 128, 256]
 Stimulate.group_num = [2, 2, 2, 2, 2, 2]
 Stimulate.oxc_ports = [8 * 3, 16 * 3, 32 * 3, 64 * 3, 128 * 3, 256]
-Stimulate.oxc_num_a_group = [3, 1, 1, 1, 1, 2]
+Stimulate.oxc_num_a_group = [64, 1, 1, 1, 1, 256]
 Stimulate.connection_cap = [1, 1, 1, 1, 1, 1]
 Stimulate.physical_conn_oxc = [int(Stimulate.oxc_ports[i] / Stimulate.nodes_num[i]) for i in
                                range(0, len(Stimulate.nodes_num))]
@@ -33,7 +33,7 @@ Stimulate.physical_conn_oxc = [int(Stimulate.oxc_ports[i] / Stimulate.nodes_num[
 
 topo_index = 1
 
-for i in range(5, 6):
+for i in range(0, 1):
     # 每次循环跑一种规模，每次循环的输入从数组中取得
     inputs = Input_class.NetworkInformation()
     inputs.nodes_num = Stimulate.nodes_num[i]
@@ -49,6 +49,8 @@ for i in range(5, 6):
 
     for j in range(1, 2):
         # 需求流量数目
+        start1 = time.time()
+        print("generating...")
         inputs.num_requests = 10
 
         # 随机产生初始逻辑拓扑
@@ -120,13 +122,14 @@ for i in range(5, 6):
         traffic_distr, flow_path, _, _ = (
             distr_Traffic.distr_Traffic(Logical_topo_init_cap, inputs))
 
+        end1 = time.time()
+        print("generate end, time = ", end1 - start1)
         RE = inputs.request
 
         for m in range(2, 3):
-            start = time.time()
             # method 取 2,使用最小重路由方案
             inputs.method = m
-
+            print("init...")
             # 修改输入，使得数据转化成可供后续函数使用的形式
             S, R, logical_topo_traffic, S_Conn_cap, port_allocation_inti_topo, port_allocation = (
                 convert_inputs.convert_inputs(inputs, flow_path, logical_topo))
@@ -134,11 +137,15 @@ for i in range(5, 6):
             # 计算初始逻辑拓扑和目标逻辑拓扑的差值
             delta_topology = Logical_topo_desi - Logical_topo_init_conn
 
+            start = time.time()
+            print("calculating physical topology...")
             # 计算目标物理拓扑
             update_logical_topo, update_check_flag = (
                 physical_topo_fu.physical_topo_fu(inputs, delta_topology, logical_topo_traffic, logical_topo,
-                                                  logical_topo_cap, 30))
+                                                  logical_topo_cap, 5))
 
+            mid = time.time()
+            print("obtain physical topology, time=", mid - start)
             if update_check_flag == 1:
                 update_logical_topo = copy.deepcopy(logical_topo_desi)
 
@@ -146,7 +153,8 @@ for i in range(5, 6):
             E = target_topo_convert.target_topo_convert(S_Conn_cap, S, logical_topo, update_logical_topo,
                                                         port_allocation_inti_topo, inputs)
 
+            print("hitless reconfiguring...")
             # 执行平滑重构算法
             stage = hitless_reconfig_v3_2.hitless_reconfigure(S, E, R, inputs, port_allocation)
             end = time.time()
-            print('stage:', stage, 'time:', end - start)
+            print('stage:', stage, 'time:', mid - start)

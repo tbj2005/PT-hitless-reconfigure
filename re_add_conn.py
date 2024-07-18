@@ -4,6 +4,7 @@
 日期：2024年06月26日
 """
 import copy
+import time
 
 import numpy as np
 import sub_add_conns_v2
@@ -29,6 +30,7 @@ def re_add_conns(inputs, logical_topo, Logical_topo_weight, update_delta_topo_ad
         update_logical_topo_try = np.empty([inputs.group_num, inputs.oxc_num_a_group], dtype=object)
         update_logical_topo_weight = np.empty([inputs.group_num, inputs.oxc_num_a_group, inputs.nodes_num,
                                                inputs.nodes_num], dtype=object)
+        start = time.time()
         for t in range(0, inputs.group_num):
             for k in range(0, inputs.oxc_num_a_group):
                 update_logical_topo_try[t][k] = copy.deepcopy(update_logical_topo[t][k])
@@ -55,6 +57,8 @@ def re_add_conns(inputs, logical_topo, Logical_topo_weight, update_delta_topo_ad
                                     Logical_topo_weight[t][k][i][j]))]
                             # 更新 weight ,更新方法为删除 weight 较小的连接，由于 weight 数组按升序排列，因此去掉前面的元素即可
 
+        end = time.time()
+        print(index, end - start)
         if index == 1:
             for t in range(0, inputs.group_num):
                 for k in range(0, inputs.oxc_num_a_group):

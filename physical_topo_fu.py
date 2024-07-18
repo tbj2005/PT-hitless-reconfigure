@@ -4,6 +4,7 @@
 日期：2024年06约24日
 """
 import copy
+import time
 
 import numpy as np
 import cost_delconn_groom
@@ -29,6 +30,7 @@ def physical_topo_fu(inputs, delta_topology, logical_topo_traffic, logical_topo,
     update_logical_topo = copy.deepcopy(logical_topo)
     update_logical_topo_cap = copy.deepcopy(logical_topo_cap)
     # 观察是否可以不移除待移除连接，直接增加待增加连接
+    start = time.time()
     for t in range(0, inputs.group_num):
         for k in range(0, inputs.oxc_num_a_group):
             triu_update_delta_topo_add = np.triu(update_delta_topo_add)
@@ -151,6 +153,9 @@ def physical_topo_fu(inputs, delta_topology, logical_topo_traffic, logical_topo,
 
     update_delta_topo_delete = copy.deepcopy(delta_topo_delete)
 
+    end = time.time()
+    print("phase1 time = ", - start + end)
+    start1 = time.time()
     while np.sum(update_delta_topo_add) > 0:
         # 循环增加连接，直到待增加连接都加进去为止
         update_topo = np.empty([inputs.group_num, inputs.oxc_num_a_group], dtype=object)
@@ -208,6 +213,7 @@ def physical_topo_fu(inputs, delta_topology, logical_topo_traffic, logical_topo,
             add_value = np.Inf
             update_logical_topo_min = np.zeros([inputs.nodes_num, inputs.nodes_num])
             while np.sum(update_delta_topo_add) > 0:
+                start2 = time.time()
                 # 循环打乱重连，直到所有待增加连接全部增加
                 b_check += 1
                 if add_value > np.sum(update_delta_topo_add):
@@ -215,10 +221,14 @@ def physical_topo_fu(inputs, delta_topology, logical_topo_traffic, logical_topo,
                     update_logical_topo_min = copy.deepcopy(update_logical_topo)
                 if b_check == max_check:
                     update_check_flag = 1
+                    end1 = time.time()
+                    print("phase2 time = ", end1 - start1)
                     return update_logical_topo_min, update_check_flag
                 update_delta_topo_add, update_logical_topo, update_delta_topo_delete = (
                     re_add_conn.re_add_conns(inputs, logical_topo, Logical_topo_weight, update_delta_topo_add,
                                              update_logical_topo, update_delta_topo_delete))
+                end2 = time.time()
+                print("re_add_conn time " + str(b_check) + "=", end2 - start2)
         else:
             # 若删除链接后可以再增加待增加连接
             min_total_benefit = np.max(total_benefit)
@@ -240,5 +250,6 @@ def physical_topo_fu(inputs, delta_topology, logical_topo_traffic, logical_topo,
             update_delta_topo_delete_tk[min_row[0]][min_col[0]] = copy.deepcopy(update_delta_topo_del_ed)
             deleted_links_all[min_row[0]][min_col[0]] += update_delta_topo_delete_tk[min_row[0]][min_col[0]]
             # 更新已删除连接
-
+    end1 = time.time()
+    print("phase2 time = ", end1 - start1)
     return update_logical_topo, update_check_flag
