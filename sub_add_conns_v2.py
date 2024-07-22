@@ -4,6 +4,8 @@
 日期：2024年06月26日
 """
 import copy
+import time
+
 import select_links
 import numpy as np
 import del_conns
@@ -29,17 +31,19 @@ def sub_add_conns_v2(inputs, update_logical_topo_weight, update_logical_topo, up
     add_del_num = np.zeros([inputs.group_num, inputs.oxc_num_a_group])
     add_del_traffic = np.empty([inputs.group_num, inputs.oxc_num_a_group], dtype=object)
     benefit = np.empty([inputs.group_num, inputs.oxc_num_a_group], dtype=object)
+    start = time.time()
     for t in range(0, inputs.group_num):
         for k in range(0, inputs.oxc_num_a_group):
             logical_topo_weight = np.zeros([inputs.nodes_num, inputs.nodes_num])
             for i in range(0, inputs.nodes_num):
                 for j in range(0, inputs.nodes_num):
+                    # if len(update_logical_topo_weight[t][k][i][j]) == 0:
                     if len(update_logical_topo_weight[t][k][i][j]) == 0:
                         # 若更新后 weight 长度为 0 ，也就是说根本没有连接，将 node 对间的权重设为 0
                         logical_topo_weight[i][j] = 0
                     else:
                         # 若更新后 weight 长度不为 0，令 node 对间的连接为最小权重连接，即第一条连接权重
-                        logical_topo_weight[i][j] = update_logical_topo_weight[t][k][i][j][0]
+                        logical_topo_weight[i][j] = update_logical_topo_weight[t][k][i][j][0] + 0
 
             update_logical_topo_kt = copy.deepcopy(update_logical_topo[t][k])
             rest_del_update_logical_topo = copy.deepcopy(update_logical_topo_kt)
@@ -66,9 +70,11 @@ def sub_add_conns_v2(inputs, update_logical_topo_weight, update_logical_topo, up
                 # 将每个 node 相关未考虑删除后待增加连接和删除连接数目储存起来，每个 node 有一个数组，数组中每个元素都是二维数组，
                 # 第一个元素存放未考虑删除后待增加连接的另一个 node ,第二个元素存放这两个 node 间删除后待增加连接的数目
 
+            start1 = time.time()
             # 使用最大流算法
             mf[t][k], add_connections[t][k] = max_flow.max_flow(inputs, match_node, max_match_num)
-
+            end1 = time.time()
+            print("maxflow", end1 - start1)
             if mf[t][k] != 0:
                 mf[t][k], add_connections[t][k] = (
                     select_links.select_links(inputs, add_connections[t][k], links_tobe_add_topo, max_match_num))
@@ -161,6 +167,8 @@ def sub_add_conns_v2(inputs, update_logical_topo_weight, update_logical_topo, up
     tobe_add_topo = copy.deepcopy(links_tobe_add_topo)
     sub_AddLinks_row, sub_AddLinks_col = np.where(tobe_add_topo)
     sub_AddLinks = [[sub_AddLinks_row[i], sub_AddLinks_col[i]] for i in range(0, len(sub_AddLinks_row))]
+    end = time.time()
+    print("sub time", end - start)
     sub_AddLinks_change = []
     for sub_AddLinks_ind in range(0, len(sub_AddLinks_row)):
         AddLinks_val = tobe_add_topo[sub_AddLinks_row[sub_AddLinks_ind]][sub_AddLinks_col[sub_AddLinks_ind]]
@@ -189,12 +197,26 @@ def sub_add_conns_v2(inputs, update_logical_topo_weight, update_logical_topo, up
             update_logical_topo[mark_row][mark_col] += (del_update_logical_topo_all[mark_row][mark_col] -
                                                         (del_links_tk_topo + del_links_tk_topo.T))
 
+            del_row, del_col = np.where(del_links_tk_topo)
+            for del_weight_i in range(0, len(del_row)):
+                if len(update_logical_topo_weight[mark_row][mark_col][del_row[del_weight_i]][del_col[del_weight_i]]) > 1:
+                    update_logical_topo_weight[mark_row][mark_col][del_row[del_weight_i]][del_col[del_weight_i]] = \
+                        update_logical_topo_weight[mark_row][mark_col][del_row[del_weight_i]][del_col[del_weight_i]][1:]
+                else:
+                    update_logical_topo_weight[mark_row][mark_col][del_row[del_weight_i]][del_col[del_weight_i]] = []
+                update_logical_topo_weight[mark_row][mark_col][del_col[del_weight_i]][del_row[del_weight_i]] = \
+                    copy.deepcopy(update_logical_topo_weight[mark_row][mark_col][
+                                      del_row[del_weight_i]][del_col[del_weight_i]])
             for add_links_tk_topo_ind in range(0, len(add_links_tk_topo)):
                 add_row = add_links_tk_topo[add_links_tk_topo_ind][0]
                 add_col = add_links_tk_topo[add_links_tk_topo_ind][1]
                 update_logical_topo[mark_row][mark_col][add_row][add_col] += 1
                 update_logical_topo[mark_row][mark_col][add_col][add_row] = update_logical_topo[mark_row][mark_col][
                     add_row][add_col] + 0
+                update_logical_topo_weight[mark_row][mark_col][add_col][add_row] = (
+                        [0] + update_logical_topo_weight[mark_row][mark_col][add_col][add_row])
+                update_logical_topo_weight[mark_row][mark_col][add_row][add_col] = (
+                        [0] + update_logical_topo_weight[mark_row][mark_col][add_row][add_col])
 
             update_delta_topo_del -= del_links_tk_topo + del_links_tk_topo.T
             update_delta_topo_del[update_delta_topo_del < 0] = 0

@@ -4,6 +4,7 @@
 日期：2024年06约25日
 """
 import copy
+import time
 
 import numpy as np
 import Input_class
@@ -34,24 +35,26 @@ def cost_del_conn_groom(inputs, delta_topo, Logical_topo, method):
         # 如果当前更新完的拓扑可以删除至少一条待删除连接
         triu_delta_topo_add = np.triu(delta_topo_add)
         reshape_triu_delta_topo_add = np.reshape(triu_delta_topo_add, (-1,), order='F')
+        nonzero = np.count_nonzero(reshape_triu_delta_topo_add)
         sort_add_delta_topo_ind = np.argsort(reshape_triu_delta_topo_add)[::-1]
+        sort_add_delta_topo_ind = sort_add_delta_topo_ind[0: nonzero]
         sub_index_col = sort_add_delta_topo_ind / inputs.nodes_num
         sub_index_col = sub_index_col.astype(int)
         sub_index_row = sort_add_delta_topo_ind % inputs.nodes_num
-        row0, col0 = np.where(triu_delta_topo_add == 0)
+        # row0, col0 = np.where(triu_delta_topo_add == 0)
         sub_index = []
-        del_sub = []
+        # del_sub = []
         for i in range(0, len(sub_index_row)):
             if reshape_triu_delta_topo_add[sort_add_delta_topo_ind[i]] > 0:
                 sub_index.append([sub_index_row[i], sub_index_col[i]])
             else:
                 break
-        for i in range(0, len(sub_index)):
-            for j in range(0, len(row0)):
-                if [sub_index[i][0], sub_index[i][1]] == [row0[j], col0[j]]:
-                    del_sub.append(i)
-                    break
-        sub_index = [sub_index[i] for i in range(0, len(sub_index)) if i not in del_sub]
+        # for i in range(0, len(sub_index)):
+        #     for j in range(0, len(row0)):
+        #         if [sub_index[i][0], sub_index[i][1]] == [row0[j], col0[j]]:
+        #             del_sub.append(i)
+        #             break
+        # sub_index = [sub_index[i] for i in range(0, len(sub_index)) if i not in del_sub]
         # 为待增加矩阵的 node 对 按照其待增加连接数目按从大到小排序
         add_links_ports = []
         for i in range(0, len(sub_index)):
@@ -130,7 +133,6 @@ def cost_del_conn_groom(inputs, delta_topo, Logical_topo, method):
         update_delta_delete_topo = np.zeros([inputs.nodes_num, inputs.nodes_num])
         rows_with_zero, _ = np.where(np.array([del_index[k][0:2] for k in range(0, len(del_index))]) == -1)
         rows_with_zero = np.unique(np.sort(rows_with_zero))
-
         del_uv = [del_index_init[rows_with_zero[k]][0:2] for k in range(0, len(rows_with_zero))]
         for i in range(0, len(rows_with_zero)):
             update_delta_delete_topo[del_uv[i][0]][del_uv[i][1]] = 1

@@ -12,7 +12,7 @@ inputs.maxhop = 2;
 inputs.resi_cap = 0.65;
 
 inputs.request = [2 3 2; 2 4 3];%%每行表示一条需求流量，三元组，源pod，目的pod和带宽需求
-% inputs.request = [2 3 3; 1 4 3;2 4 1];%% 网络比较满，没有可用流量
+inputs.request = [2 3 3; 1 4 3;2 4 1];%% 网络比较满，没有可用流量
 
 
 for m = 2:2

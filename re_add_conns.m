@@ -2,28 +2,15 @@
 %%% 2 对于每个待增加的链接  删除每个平面和该节点有关的所有连接 再进行判断
 %%% 该函数实现第一种方法
 function [links_tobe_add_topo,update_logical_topo,update_delta_topo_del] = re_add_conns(inputs,logical_topo,Logical_topo_weight,update_delta_topo_add, update_logical_topo, update_delta_topo_del)
+
+% while
+
+
+% check_tk_topo = ones(inputs.groupnum,inputs.oxcnum_agroup);%初始化标记矩阵
+%当所有的t,k 被检查完或者sub_addlinks_change是空的，即应该增加的链接被增加完
 index = 1;
-while index <= inputs.groupnum * inputs.oxcnum_agroup
-    
-    %%更新update_logical_topo_weight，以便决定在删除链接上的流量
-    %%每更新一次update_logical_topo,就相应更新update_logical_topo_weight，下边选择的时候只是应用，没有变更
-    for t = 1:inputs.groupnum
-        for k = 1:inputs.oxcnum_agroup
-           update_logical_topo_try{t,k} = update_logical_topo{t,k};
-           for i = 1:inputs.nodes_num
-               for j = 1:inputs.nodes_num
-                    if update_logical_topo_try{t,k}(i,j) > logical_topo{t,k}(i,j) %有新增链接，weight为0
-                        new_add_link_num = update_logical_topo_try{t,k}(i,j) - logical_topo{t,k}(i,j);
-                        update_logical_topo_weight{t,k}{i,j} = [zeros(1,new_add_link_num),Logical_topo_weight{t,k}{i,j}];
-                    else
-                        new_del_link_num = -update_logical_topo_try{t,k}(i,j) + logical_topo{t,k}(i,j);
-                        update_logical_topo_weight{t,k}{i,j} = [Logical_topo_weight{t,k}{i,j}(new_del_link_num+1:end)];
-                        
-                    end
-               end
-           end
-        end
-    end
+update_logical_topo_weight = Logical_topo_weight; %update_logical_topo_weight weight随着logical_topo更新，不要全部遍历 
+while index <= inputs.groupnum * inputs.oxcnum_agroup                           
     if index == 1
         %%inputs for this function: update_delta_topo_add, update_logical_topo, logical_topo_weight
         %像删除链接一个每个节点对之间取一个组成新的要增加的拓扑
@@ -56,6 +43,13 @@ while index <= inputs.groupnum * inputs.oxcnum_agroup
         % [links_tobe_add_topo,update_logical_topo,update_delta_topo_del,used_ind] = sub_add_conns(inputs,update_logical_topo_weight, update_logical_topo, update_delta_topo_del,links_tobe_add_topo,used_ind);
         [links_tobe_add_topo,update_logical_topo,update_delta_topo_del,used_ind] = sub_add_conns_v2(inputs,update_logical_topo_weight, update_logical_topo, update_delta_topo_del,links_tobe_add_topo,used_ind,del_update_logical_topo);
         
+        %%debug
+        row_sums = sum(update_logical_topo{used_ind}, 2);
+        [find_rows,~] = find(row_sums > inputs.physical_conn_oxc); %超出
+        if ~isempty(find_rows)
+            disp('out')
+            disp(find_rows)
+        end
         index = index +1;
 
         if isempty(links_tobe_add_topo)
@@ -65,16 +59,30 @@ while index <= inputs.groupnum * inputs.oxcnum_agroup
         % [links_tobe_add_topo,update_logical_topo,update_delta_topo_del,used_ind] = sub_add_conns(inputs,update_logical_topo_weight, update_logical_topo, update_delta_topo_del,links_tobe_add_topo,used_ind);
         [links_tobe_add_topo,update_logical_topo,update_delta_topo_del,used_ind] = sub_add_conns_v2(inputs,update_logical_topo_weight, update_logical_topo, update_delta_topo_del,links_tobe_add_topo,used_ind,del_update_logical_topo);
 
-        % if ~isequal(update_logical_topo{used_ind(end)},update_logical_topo{used_ind(end)}') 
-        %     disp('not equal2')
-        %     disp(used_ind)
-        % end
+        if ~isequal(update_logical_topo{used_ind(end)},update_logical_topo{used_ind(end)}') 
+            disp('not equal2')
+            disp(used_ind)
+        end
 
         index = index +1;  
         if isempty(links_tobe_add_topo)
             break
         end
     end
+
+    % disp('in this loop')
 end
 
+
+
+
+
+
+
+
+
+
+
+
+  
 
