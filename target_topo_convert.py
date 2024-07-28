@@ -14,10 +14,11 @@ def target_topo_convert(S_Conn_cap, S, logical_topo, update_logical_topo, port_a
     add_logical_topo = np.empty((T, K), dtype=object)
     for t in range(0, T):
         for k in range(0, K):
+            """
             for de in range(0, inputs.nodes_num):
                 sum_row[t][k][de] = np.sum(update_logical_topo[t][k], axis=1)[de]
                 sum_col[t][k][de] = np.sum(update_logical_topo[t][k], axis=0)[de]
-
+            """
             del_logical_topo[t][k] = logical_topo[t][k] - update_logical_topo[t][k]
             del_logical_topo[t][k][del_logical_topo[t][k] < 0] = 0
             add_logical_topo[t][k] = update_logical_topo[t][k] - logical_topo[t][k]

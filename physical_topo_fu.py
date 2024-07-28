@@ -45,13 +45,14 @@ def physical_topo_fu(inputs, delta_topology, logical_topo_traffic, logical_topo,
             print(t, k, len(sub_index_row))
             # row0, col0 = np.where(triu_update_delta_topo_add == 0)
             # 按增加连接数从大到小为 node 对排序,在这里，排序与 matlab 不同，但都是正确的
-            sub_index = []
+            # sub_index = []
+            sub_index = [[sub_index_row[i], sub_index_col[i]] for i in range(0, len(sub_index_row))]
+            """
             for i in range(0, len(sub_index_row)):
                 if reshape_triu_update_delta_topo_add[sort_add_delta_topo_ind[i]] > 0:
                     sub_index.append([sub_index_row[i], sub_index_col[i]])
                 else:
                     break
-            """
             del_sub = []
             for i in range(0, len(sub_index)):
                 for j in range(0, len(row0)):
@@ -104,8 +105,9 @@ def physical_topo_fu(inputs, delta_topology, logical_topo_traffic, logical_topo,
     # 当可以直接增线的连接都处理完，需要考虑删除待删除连接，腾出端口后增加待增加连接
     for t in range(0, inputs.group_num):
         for k in range(0, inputs.oxc_num_a_group):
-            logical_topo_traffic[t][k] += logical_topo_traffic[t][k].T
             rows, cols = np.where(logical_topo_traffic[t][k])
+            logical_topo_traffic[t][k] += logical_topo_traffic[t][k].T
+            # traffic矩阵表示单向流量，但是流量会使用掉两个节点间两个方向的带宽
             # 找出流量相关 node
             for u in range(0, inputs.nodes_num):
                 for v in range(0, inputs.nodes_num):
@@ -129,10 +131,14 @@ def physical_topo_fu(inputs, delta_topology, logical_topo_traffic, logical_topo,
                                 [0 for _ in range(0, int(actual_LinkSum - w_required_LinkNum_floor))] +
                                 [inputs.connection_cap * (i + 1) for i in range(0, int(w_required_LinkNum_floor))])
                         # 更新此时的 weight 为[0 * 未使用的连接， i * 使用连接]
+                        Logical_topo_weight[t][k][cols[w_ind]][rows[w_ind]] = (
+                            Logical_topo_weight)[t][k][rows[w_ind]][cols[w_ind]]
                     else:
                         # 若现有连接不够用，说明还得加连接，相等也被划进此类，这是因为放哪里都是一样的
                         Logical_topo_weight[t][k][rows[w_ind]][cols[w_ind]] = (
                             [inputs.connection_cap * (i + 1) for i in range(0, int(w_required_LinkNum_floor))])
+                        Logical_topo_weight[t][k][cols[w_ind]][rows[w_ind]] = (
+                            Logical_topo_weight)[t][k][rows[w_ind]][cols[w_ind]]
                         # 更新此时的 weight 为[i * 使用连接]
                 else:
                     # 若流量需求不是带宽的整数倍
@@ -142,12 +148,16 @@ def physical_topo_fu(inputs, delta_topology, logical_topo_traffic, logical_topo,
                                 [res_traffic] + [inputs.connection_cap * (i + 1) for i in
                                                  range(0, int(w_required_LinkNum_floor))])
                         # 更新此时的 weight 为[带宽余数， i * 用满连接]
+                        Logical_topo_weight[t][k][cols[w_ind]][rows[w_ind]] = (
+                            Logical_topo_weight)[t][k][rows[w_ind]][cols[w_ind]]
                     else:
                         # 现有带宽可以满足要求且会有空连接剩余
                         Logical_topo_weight[t][k][rows[w_ind]][cols[w_ind]] = (
                                 [0 for _ in range(0, int(actual_LinkSum - w_required_LinkNum_floor - 1))] +
                                 [res_traffic] +
                                 [inputs.connection_cap * (i + 1) for i in range(0, int(w_required_LinkNum_floor))])
+                        Logical_topo_weight[t][k][cols[w_ind]][rows[w_ind]] = (
+                            Logical_topo_weight)[t][k][rows[w_ind]][cols[w_ind]]
                         # 更新此时的 weight 为[0 * 未使用的连接， 带宽余数， i * 用满连接]
             """
             for u in range(0, inputs.nodes_num):
@@ -158,7 +168,7 @@ def physical_topo_fu(inputs, delta_topology, logical_topo_traffic, logical_topo,
             """
             update_delta_topo_delete_tk[t][k] = np.zeros([inputs.nodes_num, inputs.nodes_num])
             deleted_links_all[t][k] = np.zeros([inputs.nodes_num, inputs.nodes_num])
-            # 存放已删除连接
+            # 存放已删除连接]
 
     update_delta_topo_delete = copy.deepcopy(delta_topo_delete)
 
@@ -175,6 +185,7 @@ def physical_topo_fu(inputs, delta_topology, logical_topo_traffic, logical_topo,
         for t in range(0, inputs.group_num):
             for k in range(0, inputs.oxc_num_a_group):
                 InterMid_delta_topo_may = copy.deepcopy(update_delta_topo_delete)
+                InterMid_delta_topo_may = np.triu(InterMid_delta_topo_may)
                 InterMid_delta_topo_may[InterMid_delta_topo_may > 0] = 1
                 row_del, col_del = np.where(InterMid_delta_topo_may)
                 # 找到待删除连接相关 node
@@ -182,9 +193,12 @@ def physical_topo_fu(inputs, delta_topology, logical_topo_traffic, logical_topo,
                 for we in range(0, len(row_del)):
                     # 遍历所有相关 node
                     if update_logical_topo[t][k][row_del[we]][col_del[we]] > 0:
-                        # 若当前子拓扑有连接可删，为其删除一条连接
-                        InterMid_delta_topo2[row_del[we]][col_del[we]] = 1
-                row_del1, col_del1 = np.where(InterMid_delta_topo2)
+                        # 若当前子拓扑有连接可删，为其删除连接
+                        InterMid_delta_topo2[row_del[we]][col_del[we]] = (
+                            min(update_logical_topo[t][k][row_del[we]][col_del[we]],
+                                delta_topo_delete[row_del[we]][col_del[we]]))
+                InterMid_delta_topo2 += InterMid_delta_topo2.T
+                row_del1, col_del1 = np.where(np.triu(InterMid_delta_topo2))
                 row_del1 = row_del1.astype(int)
                 col_del1 = col_del1.astype(int)
                 # 找到该轮删除连接的 node 对
@@ -196,12 +210,14 @@ def physical_topo_fu(inputs, delta_topology, logical_topo_traffic, logical_topo,
                     # 如果这个子拓扑有能删的连接
                     delta_topo_delete_weight = copy.deepcopy(InterMid_delta_topo2)
                     deleted_links_all_1[t][k] = deleted_links_all[t][k] + InterMid_delta_topo2
+                    deleted_links_all_2 = copy.deepcopy(deleted_links_all_1[t][k])
                     # 更新删除一条连接后的连接删除矩阵
                     for we_in in range(0, len(row_del1)):
-                        deleted_links_all_2 = copy.deepcopy(deleted_links_all_1[t][k])
                         delta_topo_delete_weight[row_del1[we_in]][col_del1[we_in]] = (
                             copy.deepcopy(Logical_topo_weight[t][k][row_del1[we_in]][
                                         col_del1[we_in]][deleted_links_all_2[row_del1[we_in]][col_del1[we_in]] - 1]))
+                        delta_topo_delete_weight[col_del1[we_in]][row_del1[we_in]] = (
+                                delta_topo_delete_weight[row_del1[we_in]][col_del1[we_in]] + 0)
                         # 删除连接权重更新，最后一个索引表示增加删除的连接的连接索引
                     delta_topo = Input_class.DeltaTopology()
                     delta_topo.delta_topo_delete_weight = copy.deepcopy(delta_topo_delete_weight)
@@ -222,6 +238,7 @@ def physical_topo_fu(inputs, delta_topology, logical_topo_traffic, logical_topo,
                     # 计算 metric 和每个子拓扑的重构方案
 
         b_check = 0
+        # print(new_add_links)
         if np.sum(new_add_links) == 0:
             # 如果每个子拓扑都不能再通过删除待删除连接以增加待增加连接了，但仍然还存在待增加连接，此时进入打断重连
             add_value = np.Inf

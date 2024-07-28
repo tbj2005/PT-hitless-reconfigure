@@ -22,9 +22,17 @@ def re_add_conns(inputs, logical_topo, Logical_topo_weight, update_delta_topo_ad
     :param update_delta_topo_delete:
     :return:
     """
+    # update_logical_topo[1][0][0][1] = 1
+    # update_logical_topo[1][0][1][0] = 1
+    # update_logical_topo[1][0][1][4] = 0
+    # update_logical_topo[1][0][4][1] = 0
+    # update_delta_topo_delete = np.zeros([inputs.nodes_num, inputs.nodes_num])
+    # update_delta_topo_delete[0][1] = 1
+    # update_delta_topo_delete[1][0] = 1
     index = 1
     update_logical_topo_weight = copy.deepcopy(Logical_topo_weight)
     del_update_logical_topo = np.empty([inputs.group_num, inputs.oxc_num_a_group], dtype=object)
+    # can_rest_port = np.zeros([inputs.group_num, inputs.oxc_num_a_group])
     # use_ind = []
     # links_tobe_add_topo = np.zeros([inputs.nodes_num, inputs.nodes_num])
     while index <= inputs.group_num * inputs.oxc_num_a_group:
@@ -67,13 +75,15 @@ def re_add_conns(inputs, logical_topo, Logical_topo_weight, update_delta_topo_ad
             use_ind = []
             for t in range(0, inputs.group_num):
                 for k in range(0, inputs.oxc_num_a_group):
-                    del_topo_row, del_topo_col = np.where(update_logical_topo[t][k])
+                    del_topo_row, del_topo_col = np.where(np.triu(update_logical_topo[t][k]))
                     # 找到已更新逻辑子拓扑有连接的 node 对
                     del_update_logical_topo[t][k] = np.zeros([inputs.nodes_num, inputs.nodes_num])
                     for i in range(0, len(del_topo_row)):
                         links_tobe_add_topo[del_topo_row[i]][del_topo_col[i]] += 1
+                        links_tobe_add_topo[del_topo_col[i]][del_topo_row[i]] += 1
                         # 为这些有至少一条连接的 node 对删一条连接，以腾出端口，放入待增加拓扑中
                         del_update_logical_topo[t][k][del_topo_row[i]][del_topo_col[i]] = 1
+                        del_update_logical_topo[t][k][del_topo_col[i]][del_topo_row[i]] = 1
                         # 保存该步骤删除的拓扑
                     del_update_logical_topo[t][k] = del_update_logical_topo[t][k].astype(int)
                     update_logical_topo[t][k] -= del_update_logical_topo[t][k]
@@ -93,7 +103,7 @@ def re_add_conns(inputs, logical_topo, Logical_topo_weight, update_delta_topo_ad
             links_tobe_add_topo, update_logical_topo, update_delta_topo_delete, use_ind = (
                 sub_add_conns_v2.sub_add_conns_v2(inputs, update_logical_topo_weight, update_logical_topo,
                                                   update_delta_topo_delete, links_tobe_add_topo, use_ind,
-                                                  del_update_logical_topo))
+                                                  del_update_logical_topo, index))
             start = time.time()
             print(start - end)
             index += 1
@@ -105,7 +115,7 @@ def re_add_conns(inputs, logical_topo, Logical_topo_weight, update_delta_topo_ad
             links_tobe_add_topo, update_logical_topo, update_delta_topo_delete, use_ind = (
                 sub_add_conns_v2.sub_add_conns_v2(inputs, update_logical_topo_weight, update_logical_topo,
                                                   update_delta_topo_delete, links_tobe_add_topo, use_ind,
-                                                  del_update_logical_topo))
+                                                  del_update_logical_topo, index))
             end = time.time()
             print(end - start)
             index += 1

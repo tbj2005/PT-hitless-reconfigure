@@ -27,7 +27,7 @@ function [total_cost,update_topo,new_add_links] = cost_delconn_groom(inputs,delt
         [row0,col0] = find(~triu_delta_topo_add);
         subindex = setdiff(subindex,[row0,col0],'rows','stable');%%去除有关0的排序，顺序可能乱，要使用stable等，不如先去掉0再排序
         add_links_ports = unique(subindex);
-        for i = 1:size(add_links_ports,1)%% Erro:重复计算了freeport
+        for i = 1:size(add_links_ports,2)%% Erro:重复计算了freeport
             %%增加相应链接之后再计算一遍节点的出度
             indexi_degree1_1 = sum(logical_topo(add_links_ports(i),:));%% original logical topo degree
             if max_links_innodes - indexi_degree1_1 > 0
@@ -88,7 +88,7 @@ function [total_cost,update_topo,new_add_links] = cost_delconn_groom(inputs,delt
                 for j = 1:2*can_add_conns_innodepair(i) 
                     [~,loc_freeports] = ismember(valuesin_addnodepairs(j),free_ports);
                     if loc_freeports ~= 0
-                       free_ports(:, loc_freeports) = 0;
+                       free_ports(loc_freeports) = 0;
                     else
                         [row_indices, col_indices] = find(del_index(:,1:2) == valuesin_addnodepairs(j));%这是一个端口，判断sortindex中含有这端口的行列
                         if ~isempty(row_indices) 

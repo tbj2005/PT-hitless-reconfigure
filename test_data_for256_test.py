@@ -126,7 +126,7 @@ for i in range(5, 6):
         print("generate end, time = ", end1 - start1)
         RE = inputs.request
 
-        for m in range(2, 3):
+        for m in range(1, 2):
             # method 取 2,使用最小重路由方案
             inputs.method = m
             print("init...")
@@ -142,7 +142,7 @@ for i in range(5, 6):
             # 计算目标物理拓扑
             update_logical_topo, update_check_flag = (
                 physical_topo_fu.physical_topo_fu(inputs, delta_topology, logical_topo_traffic, logical_topo,
-                                                  logical_topo_cap, 5))
+                                                  logical_topo_cap, 2))
 
             mid = time.time()
             print("obtain physical topology, time=", mid - start)
@@ -157,4 +157,4 @@ for i in range(5, 6):
             # 执行平滑重构算法
             stage = hitless_reconfig_v3_2.hitless_reconfigure(S, E, R, inputs, port_allocation)
             end = time.time()
-            print('stage:', stage, 'time:', mid - start)
+            print('stage:', stage, 'time:', mid - end)

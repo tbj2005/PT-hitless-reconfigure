@@ -11,12 +11,16 @@ matlab仿真文件：test_data_for256_test.m
 其中大规模仿真规模支持自定义修改输入结构体。
 
 matlab仿真文件和python仿真文件在同输入下输出结果可能不同，这与算法无关，原因是python和matlab在执行同样操作时获得的输出不同，但是都是正确的
+具体来说就是两者在处理二维数组时遍历的顺序不同，python逐行遍历而matlab逐列遍历，这导致在一些排序和找索引时，两者会出现差异，但理论上都是对的
+
+不仅如此，python中的network库函数和matlab函数maxflow虽然都实现同一功能，但是两者实现方式不同，遍历顺序不同，导致两者即使相同输入，输出也
+不同，这也会导致两者的结果出现偏差
 
 ## 具体代码使用：
 
 ### 库函数要求
 
-numpy, networkx， PyMaxflow
+numpy, networkx
 
 报  no module + 库函数名的错误解决方法：
 
